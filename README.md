@@ -171,3 +171,7 @@ Cookie files are secrets — do not commit them.
 - The tree is ARIA-inspired, not Playwright `ariaSnapshot()`.
 - Cross-origin iframes are listed but not inspected.
 - No screenshots — YAML tree + locators only.
+
+## Sibling
+
+Playwright / TypeScript capture: https://github.com/fredoz0999/pagesnap-playwright
