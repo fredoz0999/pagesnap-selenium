@@ -13,6 +13,8 @@ import { ensureIndex, resolveSession, userPath } from "./paths.js";
 import { validateJava } from "./validate.js";
 import { writePom } from "./pom.js";
 import { generateBdd } from "./bdd.js";
+import { healJava } from "./heal.js";
+import { verifySession } from "./verify.js";
 import { bench, benchTmpCopy } from "./bench.js";
 import { automatePrompt, cucumberPrompt, installPrompts, sessionGoal, slugify, testCasesPrompt, writeSessionPrompts } from "./prompts.js";
 
@@ -23,6 +25,8 @@ const USAGE = `pagesnap lean pack - token-lean snapshots for coding agents
   npm run pack -- stats    <session|latest>
   npm run pack -- bench    <session|latest> [--md]
   npm run pack -- validate <session|latest> <File.java|folder>
+  npm run pack -- heal     <session|latest> <File.java|folder> [--log=maven-output.txt] [--write]
+  npm run pack -- verify   <session|latest> [--base-url=https://staging.example.com] [--storage=state.json] [--step=N]
   npm run pack -- bdd      <session|latest> [--features=src/test/resources/features] [--steps=src/test/java/steps] [--package=steps] [--pages-package=pages] [--driver="DriverManager.getDriver()"] [--assertions=testng|junit] [--runner=testng|junit] [--tags=@smoke]
   npm run pack -- pom      <session|latest> [--out=src/test/java/pages] [--package=pages]
   npm run pack -- prompt   <session|latest> [--cases|--cucumber] [--name=checkout-flow]
@@ -32,6 +36,8 @@ build     compact every NN_*.yaml into lean/NN_*.txt, chunk by UI region, write 
 query     hybrid search (keyword + vector + exact name) -> page outline + the few chunks that matter
 stats     raw vs compact token estimate per page
 validate  check every By.* locator in your Java tests/page objects against the snapshots (no LLM tokens). Exit 1 if any is missing.
+heal      suggest replacements for missing / ambiguous / failing By.* locators from the snapshots; --write applies clear winners; --log reads a Selenium failure log
+verify    reopen each captured page (installed Chrome via playwright-core; PAGESNAP_CHROME=path) and count matches per locator: ok / gone / ambiguous
 bdd       generate a Cucumber .feature + step definitions (Cucumber-JVM) bound to the page objects; unmatched notes become Pending steps
 pom       generate Selenium Java page objects (BasePage + one class per URL path) from the verified locators (no LLM) + PAGES.md map
 bench     tokens an agent reads for the whole flow: raw / compact / query / query+diff / PAGES.md / ariaSnapshot
@@ -94,6 +100,21 @@ async function main(argv: string[]): Promise<number> {
       for (const p of r.pending) console.log("  PENDING step " + p.step + ": " + p.text);
       console.log("Needs the page objects from `pack pom` (package " + (flag(rest, "pages-package") || "pages") + ") and a WebDriver at " + (flag(rest, "driver") || "DriverManager.getDriver()") + ".");
       return 0;
+    }
+    case "heal": {
+      const target = pos[0];
+      if (!target) { console.error("heal needs a .java file or folder"); return 1; }
+      const logFile = flag(rest, "log");
+      const rep = healJava(dir, userPath(target), { write: rest.includes("--write"), log: logFile ? fs.readFileSync(userPath(logFile), "utf8") : undefined });
+      process.stdout.write(rep.text);
+      return 0;
+    }
+    case "verify": {
+      const st = flag(rest, "step");
+      const storage = flag(rest, "storage");
+      const rep = await verifySession(dir, { baseUrl: flag(rest, "base-url"), storage: storage ? userPath(storage) : undefined, steps: st ? st.split(",").map(Number) : undefined });
+      process.stdout.write(rep.text);
+      return rep.counts.gone > 0 ? 1 : 0;
     }
     case "validate": {
       const target = pos[0];

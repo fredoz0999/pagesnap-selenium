@@ -189,6 +189,8 @@ npm run pack -- stats latest
 npm run pack -- bench latest [--md]             # tokens per approach for the whole flow
 npm run pack -- pom latest --out=../src/test/java/pages [--package=pages]   # Java page objects, no LLM
 npm run pack -- validate latest ../src/test/java      # check every By.* against the snapshots, exit 1 on MISS
+npm run pack -- heal latest ../src/test/java [--log=maven-output.txt] [--write]   # suggest/apply replacements for missing or failing By.*
+npm run pack -- verify latest [--base-url=https://staging.example.com]             # live drift check: ok / gone / ambiguous
 npm run pack -- bdd latest --features=../src/test/resources/features --steps=../src/test/java/steps \
   --driver="com.acme.DriverManager.getDriver()" [--assertions=testng|junit] [--runner=testng|junit] [--tags=@smoke]
 npm run pack -- prompt latest --cucumber          # agent prompt: pom -> bdd draft -> fill pending -> validate
@@ -222,4 +224,15 @@ Defaults suit a Cucumber + TestNG project: `--assertions=testng`, no runner file
 `steps`. Point `--driver` at your own accessor (a Serenity or ThreadLocal driver factory). Existing step definitions are
 not read, so review the draft for duplicates before merging; `prompt --cucumber` tells an agent to reuse existing steps.
 
-Not ported: `heal` (rewrites TS specs) and the live `verify` drift check.
+### Heal and verify
+
+`heal` takes the locators `validate` calls `MISS`/`AMBG`, plus any locator a Selenium failure log names
+(`NoSuchElementException ... {"method":"css selector","selector":"[id=\"x\"]"}`), and ranks the closest captured control by
+name/id similarity (token overlap plus character bigrams, so `user_name` finds `username`). `--write` rewrites a call only when
+the best candidate has confidence >= 0.75 and is 0.15 ahead of the runner-up, and never for ambiguous locators.
+
+`verify` reopens every captured page in headless Chrome (via `playwright-core`; set `PAGESNAP_CHROME=/path/to/chrome` or
+`PAGESNAP_CHANNEL=msedge`) and counts how many elements each recorded locator matches now: 1 ok, 0 gone, more than 1 ambiguous.
+It uses Playwright only as a fast counter for CSS / XPath / link-text; it does not run your Selenium tests. `--base-url` points
+the check at another environment; `--storage` takes a Playwright storageState for logged-in pages. Pages that redirected or
+whose state differs from the capture are reported as skipped, not as drift. Exit code 1 when anything is gone.

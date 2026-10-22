@@ -96,3 +96,54 @@ describe("cucumber generation", () => {
     ]);
   });
 });
+
+describe("heal", () => {
+  it("suggests the captured control for a renamed id and applies only clear winners", async () => {
+    const { healJava, failingLocatorsFromLog } = await import("../src/heal.js");
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ps-heal-"));
+    const f = path.join(dir, "T.java");
+    fs.writeFileSync(f, [
+      'driver.findElement(By.id("user_name"));',
+      'driver.findElement(By.cssSelector("[data-test=\\"login-btn\\"]"));',
+    ].join("\n"));
+    const dry = healJava(FIXTURE, f);
+    expect(dry.suggestions.map((s) => s.candidates[0].code)).toEqual([
+      'By.cssSelector("[data-test=\\"username\\"]")', 'By.cssSelector("[data-test=\\"login-button\\"]")',
+    ]);
+    expect(fs.readFileSync(f, "utf8")).toContain('By.id("user_name")'); // dry run leaves the file alone
+    const wrote = healJava(FIXTURE, f, { write: true });
+    expect(wrote.written).toBe(1); // user_name -> username is clear; login-btn -> login-button is not
+    const after = fs.readFileSync(f, "utf8");
+    expect(after).toContain('By.cssSelector("[data-test=\\"username\\"]")');
+    expect(after).toContain('login-btn');
+    expect(failingLocatorsFromLog('{"method":"css selector","selector":"[id=\\"x\\"]"} {"method":"link text","selector":"Go"}'))
+      .toEqual([{ by: "id", value: "x" }, { by: "linkText", value: "Go" }]);
+  });
+});
+
+const CHROME = process.env.PAGESNAP_CHROME || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+describe.skipIf(!fs.existsSync(CHROME))("verify (live, needs Chrome)", () => {
+  it("reports locators that drifted on the live page", async () => {
+    const http = await import("node:http");
+    const { verifySession } = await import("../src/verify.js");
+    process.env.PAGESNAP_CHROME = CHROME;
+    const nav = '<header><a data-test="home" href="/">Home</a><a href="/about">About</a><a href="/help">Help</a><a data-test="shopping-cart-link"><span data-test="shopping-cart-badge">0</span></a></header>';
+    const pages: Record<string, string> = {
+      "/index.html": '<title>Login</title><body>' + nav + '<main><h1>Login</h1><form><label>Username <input id="user-name" name="user-name" data-test="username"></label><label>Password <input type="password" id="password" name="password" data-test="password"></label><input type="submit" id="login-button" data-test="login-button" value="Login"></form></main></body>',
+      "/inventory.html": "<title>Products</title><body>" + nav + "<main><h1>Products</h1></main></body>",
+      // the checkout button lost its data-test: drift
+      "/cart.html": '<title>Your Cart</title><body>' + nav + '<main><h1>Your Cart</h1><button data-test="remove-fleece-jacket">Remove</button><button data-test="continue-shopping">Continue Shopping</button><button class="co">Checkout</button></main></body>',
+    };
+    const server = http.createServer((req, res) => { res.setHeader("content-type", "text/html"); res.end(pages[req.url || ""] ?? "<body>404</body>"); });
+    await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
+    const port = (server.address() as { port: number }).port;
+    try {
+      const rep = await verifySession(FIXTURE, { baseUrl: "http://127.0.0.1:" + port, steps: [1, 3] });
+      expect(rep.counts.gone).toBe(1);
+      expect(rep.items.find((i) => i.status === "gone")!.label).toContain("Checkout");
+      expect(rep.items.filter((i) => i.step === 1).every((i) => i.status === "ok")).toBe(true);
+    } finally {
+      server.close();
+    }
+  }, 60000);
+});

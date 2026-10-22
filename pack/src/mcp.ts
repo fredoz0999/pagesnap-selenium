@@ -18,6 +18,8 @@ import readline from "node:readline";
 import { buildIndex, LEAN_DIR, queryIndex } from "./index.js";
 import { validateJava } from "./validate.js";
 import { writePom } from "./pom.js";
+import { healJava } from "./heal.js";
+import { verifySession } from "./verify.js";
 import { ensureIndex, resolveSession, userPath } from "./paths.js";
 
 export const PROTOCOL_VERSION = "2025-06-18";
@@ -90,6 +92,32 @@ export const TOOLS: Tool[] = [
     async run(a) {
       const rep = validateJava(resolveSession(need(a, "session")), userPath(need(a, "target")));
       return { text: rep.text, isError: rep.counts.missing > 0 };
+    },
+  },
+  {
+    name: "pagesnap_heal",
+    description: "Suggest replacements for missing/ambiguous By.* locators in Java, or for locators a Selenium run reported (pass its output as log). write=true applies only clear winners.",
+    inputSchema: {
+      type: "object",
+      properties: { session, target: { type: "string", description: ".java file or folder" }, log: { type: "string", description: "Selenium/Maven failure output (text or a path to it)" }, write: { type: "boolean" } },
+      required: ["session", "target"],
+    },
+    async run(a) {
+      let log = str(a, "log");
+      if (log && log.length < 300 && fs.existsSync(userPath(log))) log = fs.readFileSync(userPath(log), "utf8");
+      const rep = healJava(resolveSession(need(a, "session")), userPath(need(a, "target")), { log, write: a.write === true });
+      return { text: rep.text };
+    },
+  },
+  {
+    name: "pagesnap_verify",
+    description: "Reopen each captured page in headless Chrome and count matches for every recorded locator (drift check). Needs network access to the app; baseUrl overrides the captured origin; storage = Playwright storageState for logged-in pages.",
+    inputSchema: { type: "object", properties: { session, baseUrl: { type: "string" }, storage: { type: "string" }, step: { type: "integer" } }, required: ["session"] },
+    async run(a) {
+      const storage = str(a, "storage");
+      const step = num(a, "step");
+      const rep = await verifySession(resolveSession(need(a, "session")), { baseUrl: str(a, "baseUrl"), storage: storage ? userPath(storage) : undefined, steps: step != null ? [step] : undefined });
+      return { text: rep.text, isError: rep.counts.gone > 0 };
     },
   },
   {

@@ -112,6 +112,8 @@ function check(file: string, call: Call, invs: Inventory[]): Finding {
       if (hit) return hit;
       const idm = /^#([\w-]+)$/.exec(arg);
       if (idm) return steps((i) => i.ids.get(idm[1]) || 0) || f("missing", "no id '" + idm[1] + "' in any snapshot");
+      // A test id always outranks the other locators, so a data-test css that no snapshot recorded does not exist on a captured page.
+      if (/^\[data-(?:testid|test|test-id|cy|qa)=/.test(arg)) return f("missing", "no test id " + arg + " in any snapshot");
       return f("unverified", "css not recorded in a snapshot - verify by running (or recapture with the control focused)");
     }
     case "xpath":

@@ -90,7 +90,7 @@ export function automatePrompt(o: PromptOpts): string {
     "",
     "When the test is written:",
     "1. Run: PACK validate \"" + S + "\" src/test/java",
-    "   Fix every MISS / AMBG using a locator from PACK query. Re-run until missing 0.",
+    "   For every MISS / AMBG run: PACK heal \"" + S + "\" src/test/java and use its candidates (or PACK query). Re-run until missing 0.",
     "2. Run: mvn -q test -Dtest=<Class>. On a locator failure re-run PACK query for that step and fix the locator from the result.",
     "   Max 3 attempts, then stop and report.",
     "3. Reply with: files changed, the validate summary line, the test result. No code recap.",
