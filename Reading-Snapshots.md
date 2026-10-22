@@ -51,7 +51,7 @@ You are given YAML page snapshots of a real web UI, captured for generating **Se
 
 ## Locator rules
 
-1. Prefer the highest `score` (data-test css 98, id 92, name 88, linkText 75, other css 45-85, xpath 40). Never use `score <= 40` unless nothing else exists; a `matches: N` locator is not unique (score capped at 40). Prefer `stability: high` (`id`, `name`, `data-testid` / `data-test` / `data-cy`).
+1. Prefer the highest `score` (data-test css 98, id 92, name 88, linkText 75, other css 45-85, label/text xpath 60, other xpath 40, generated values 20). Never use `score <= 40` unless nothing else exists; a `matches: N` locator is not unique (score capped at 40). Prefer `stability: high` (`id`, `name`, `data-testid` / `data-test` / `data-cy`). Never use a locator containing a generated value (ULID/UUID, `mat-input-4`, `input-8472`, `css-1x2y3z`): it changes next run.
 2. Then `css` with stable attributes.
 3. Use `xpath` / link text only as last resort.
 4. Never invent ids or names not present in the snapshot.

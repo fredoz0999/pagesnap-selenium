@@ -255,9 +255,9 @@ public class SnapshotCapture {
                 const ph = el.getAttribute('placeholder');
                 if (ph && ph.trim()) return redactText(ph.trim());
                 const name = el.getAttribute('name');
-                if (name && name.trim()) return name.trim();
+                if (name && name.trim() && !isDynamicValue(name)) return name.trim();
                 const id = el.getAttribute('id');
-                if (id && id.trim()) return id.trim();
+                if (id && id.trim() && !isDynamicValue(id)) return id.trim();
               }
 
               if (el.tagName === 'BUTTON' || el.tagName === 'A' || el.getAttribute('role') === 'button') {
@@ -360,7 +360,7 @@ public class SnapshotCapture {
               let node = el;
               while (node && node.nodeType === 1 && parts.length < 8) {
                 const id = node.getAttribute('id');
-                if (id && !/^[0-9]/.test(id) && scope.querySelectorAll(attrSel('id', id)).length === 1) {
+                if (id && !/^[0-9]/.test(id) && !isDynamicValue(id) && scope.querySelectorAll(attrSel('id', id)).length === 1) {
                   parts.unshift('#' + cssEscape(id));
                   return parts.join(' > ');
                 }
@@ -419,15 +419,42 @@ public class SnapshotCapture {
               if (loc.by === 'name') return 88;
               if (loc.by === 'linkText') return 75;
               if (loc.by === 'css') return loc.stability === 'low' ? 45 : loc.stability === 'medium' ? 65 : 85;
+              if (loc.by === 'xpath' && loc.stability === 'medium') return 60;
               return 40;
             };
-            // Generated ids (ULID, UUID, long hex, long digit runs) change when the app reseeds its data,
-            // so a data-test/id that embeds one is not a stable locator whatever its attribute says.
-            const GENERATED_VALUE = /[0-9A-HJKMNP-TV-Z]{26}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}|[0-9a-f]{16,}|\\d{6,}/;
+            // A value that changes between runs (generated ids, counters, hashed class names) is never a
+            // valid locator, whatever attribute it sits in. Mirrored in pack/src/dynamic.ts (parity-tested).
+            const isDynamicValue = (v) => {
+              const t = String(v == null ? '' : v);
+              if (!t) return false;
+              if (/[0-9A-HJKMNP-TV-Z]{26}/.test(t)) return true;                       // ULID
+              if (/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}/.test(t)) return true; // UUID
+              if (/(?=[0-9a-f]*\\d)[0-9a-f]{12,}/i.test(t)) return true;                 // long hex / hash
+              if (/\\d{3,}/.test(t)) return true;                                       // 3+ digit run: counters, timestamps, row ids
+              if (/^(mat|ng|ember|react|rc|ui|mui|radix|headlessui|downshift|select2|gwt|yui|ext)[-_a-z]*\\d+/i.test(t)) return true; // framework counters
+              if (/^:r[0-9a-z]*:$/.test(t) || /\u00ab[a-z0-9]+\u00bb/.test(t)) return true;  // React useId
+              if (/^(css|sc|jss|emotion|styled)-[a-z0-9]{5,}$/i.test(t)) return true;        // CSS-in-JS classes
+              if (/_[A-Za-z]+__[A-Za-z0-9_-]{5}$/.test(t)) return true;                       // CSS-modules localIdent
+              const flat = t.replace(/[-_.:\\s]/g, '');
+              if (flat.length >= 8 && /\\d/.test(flat) && /[a-z]/i.test(flat) && /^[a-z0-9]+$/i.test(flat)) {
+                let flips = 0;
+                for (let i = 1; i < flat.length; i++) if (/\\d/.test(flat[i]) !== /\\d/.test(flat[i - 1])) flips++;
+                if (flips >= 4) return true;                                                // random-looking token
+              }
+              return false;
+            };
+            const locatorHasDynamic = (loc) => {
+              if (loc.by === 'id' || loc.by === 'name') return isDynamicValue(loc.value);
+              if (loc.by === 'linkText') return false; // visible text is user-facing, not generated
+              const parts = [];
+              String(loc.value).replace(/"([^"]*)"/g, (m, g) => { parts.push(g); return m; });
+              String(loc.value).replace(/[#.]([A-Za-z_][-\\w]*)/g, (m, g) => { parts.push(g); return m; });
+              return parts.some(isDynamicValue);
+            };
             const stampScore = (loc) => {
-              if (loc.by !== 'linkText' && GENERATED_VALUE.test(String(loc.value))) loc.stability = 'low';
+              if (loc.by !== 'linkText' && locatorHasDynamic(loc)) { loc.stability = 'low'; loc.dynamic = true; }
               loc.score = locatorScore(loc);
-              if (loc.stability === 'low' && loc.by !== 'xpath' && loc.matches == null) loc.score = Math.min(loc.score, 45);
+              if (loc.dynamic && loc.matches == null) loc.score = Math.min(loc.score, 20);
               return loc;
             };
 
@@ -441,10 +468,23 @@ public class SnapshotCapture {
                 locators.push(stampScore({ by: by, value: String(value), stability: stability }));
               };
 
+              // Stable prefix of a generated value ("category-01M5..." -> "category-"): only kept if it is unique.
+              const prefixCands = [];
+              const stablePrefix = (v) => {
+                const m = String(v).match(/^([A-Za-z][A-Za-z_-]*[-_])/);
+                return m && m[1].length >= 4 && !isDynamicValue(m[1]) ? m[1] : null;
+              };
               const testId = el.getAttribute('data-testid') || el.getAttribute('data-test')
                 || el.getAttribute('data-test-id') || el.getAttribute('data-cy')
                 || el.getAttribute('data-qa');
-              if (testId) {
+              if (testId && isDynamicValue(testId)) {
+                const attr0 = el.hasAttribute('data-testid') ? 'data-testid'
+                  : el.hasAttribute('data-test') ? 'data-test'
+                  : el.hasAttribute('data-test-id') ? 'data-test-id'
+                  : el.hasAttribute('data-cy') ? 'data-cy' : 'data-qa';
+                const pf = stablePrefix(testId);
+                if (pf) prefixCands.push('[' + attr0 + '^="' + pf + '"]');
+              } else if (testId) {
                 const attr = el.hasAttribute('data-testid') ? 'data-testid'
                   : el.hasAttribute('data-test') ? 'data-test'
                   : el.hasAttribute('data-test-id') ? 'data-test-id'
@@ -454,14 +494,17 @@ public class SnapshotCapture {
               }
 
               const id = el.getAttribute('id');
-              if (id && !/^[0-9]/.test(id) && id.length < 80) {
+              if (id && isDynamicValue(id)) {
+                const pf = stablePrefix(id);
+                if (pf) prefixCands.push('[id^="' + pf + '"]');
+              } else if (id && !/^[0-9]/.test(id) && id.length < 80) {
                 push('id', id, 'high');
                 hasId = true;
                 // Do NOT also emit css #id — By.id is the Selenium-native twin.
               }
 
               const name = el.getAttribute('name');
-              if (name) {
+              if (name && !isDynamicValue(name)) {
                 push('name', name, 'high');
                 hasName = true;
                 // Skip tag[name=…] css twin of By.name unless we have no id/testId.
@@ -471,7 +514,7 @@ public class SnapshotCapture {
               }
 
               const aria = el.getAttribute('aria-label');
-              if (aria && aria.trim() && !hasId && !hasTestId) {
+              if (aria && aria.trim() && !isDynamicValue(aria) && !hasId && !hasTestId) {
                 push('css', '[aria-label="' + aria.trim().replace(/"/g, '\\\\"') + '"]', 'medium');
               }
 
@@ -487,7 +530,7 @@ public class SnapshotCapture {
                   if (href.length < 120) {
                     // *= is more stable when servers rewrite session ids into paths
                     const bare = href.split('?')[0].split('#')[0];
-                    if (bare) push('css', 'a[href*="' + bare.replace(/"/g, '\\\\"') + '"]', 'medium');
+                    if (bare && !isDynamicValue(bare)) push('css', 'a[href*="' + bare.replace(/"/g, '\\\\"') + '"]', 'medium');
                   }
                 }
                 // Prefer href css over linkText when both exist; keep linkText only as
@@ -522,6 +565,21 @@ public class SnapshotCapture {
                 }
               }
 
+              // Stable-text fallbacks for form controls whose id/name/test id is missing or generated.
+              if (!hasId && !hasTestId && /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) {
+                const ph = el.getAttribute('placeholder');
+                if (ph && ph.trim() && !isDynamicValue(ph)) {
+                  push('css', el.tagName.toLowerCase() + '[placeholder="' + ph.trim().replace(/"/g, '\\\\"') + '"]', 'medium');
+                }
+                const lbl = el.labels && el.labels.length ? (el.labels[0].innerText || '').replace(/\\s+/g, ' ').trim() : '';
+                if (lbl && lbl.length < 60 && lbl.indexOf('"') < 0) {
+                  const tag = el.tagName.toLowerCase();
+                  const wrapped = el.labels[0].contains(el);
+                  push('xpath', '//label[normalize-space()="' + lbl + '"]' + (wrapped ? '//' + tag : '/following::' + tag + '[1]'), 'medium');
+                }
+              }
+              for (const pc of prefixCands) push('css', pc, 'low'); // unique today, but any new sibling with the prefix breaks it
+
               // de-dupe by by+value
               const seen = new Set();
               const candidates = locators.filter(l => {
@@ -543,6 +601,7 @@ public class SnapshotCapture {
                   verified.push(cand);
                   continue;
                 }
+                if (prefixCands.indexOf(cand.value) >= 0) continue; // a non-unique prefix is noise, not a locator
                 if (found.length > 1 && found.indexOf(el) >= 0) {
                   const narrowed = repairLocator(el, cand);
                   if (narrowed && !verified.some(v => v.by === narrowed.by && v.value === narrowed.value)) {
@@ -571,6 +630,11 @@ public class SnapshotCapture {
                 }
                 return true;
               });
+
+              // A locator built on a generated value is dropped whenever any stable one exists.
+              if (cleaned.some(l => !l.dynamic)) {
+                for (let i = cleaned.length - 1; i >= 0; i--) if (cleaned[i].dynamic) cleaned.splice(i, 1);
+              }
 
               // Rank by numeric score (best first); ties fall back to `by` for stable output.
               cleaned.sort((a, b) => (b.score - a.score) || a.by.localeCompare(b.by));
@@ -1459,6 +1523,7 @@ public class SnapshotCapture {
         prompt.append("- Read `SESSION.md`, then `TEST_GUIDE.md`, then `flow.md`, then the YAML snapshots.\n");
         prompt.append("- Prefer the highest `score` locator. Never use `score <= 40` unless nothing else exists; a `matches: N` locator is not unique.\n");
         prompt.append("- Prefer locators marked `stability: high` (id, name, data-testid) from the YAML. Never use `stability: low` unless nothing else exists.\n");
+        prompt.append("- Never use a locator containing a generated value (ULID/UUID, counters like mat-input-4 or input-8472, hashed classes like css-1x2y3z): it changes next run. Such locators are scored 20 and are only listed when nothing stable exists; then ask the developer for a stable data-test.\n");
         prompt.append("- Do not `driver.get(...)` a URL to skip a control that is in the YAML (especially the cart).\n");
         prompt.append("- Each control lists at most two verified locators (token-lean); do not invent extras.\n");
         prompt.append("- Use ").append(waits).append(" waits (avoid brittle Thread.sleep).\n");
@@ -1494,6 +1559,7 @@ public class SnapshotCapture {
         guide.append("Produce ONE runnable Selenium Java test covering EVERY flow.md step in order. Do not invent steps or elements.\n\n");
         guide.append("## Locators\n");
         guide.append("- Prefer the highest `score`. Never use `score <= 40` unless nothing else exists. Never use `stability: low` unless nothing else exists.\n");
+        guide.append("- Never use a locator containing a generated value (ULID/UUID, counters like mat-input-4 or input-8472, hashed classes like css-1x2y3z): it changes next run. Such locators are scored 20 and are only listed when nothing stable exists; then ask the developer for a stable data-test.\n");
         guide.append("- YAML `by: css` with a `[data-test...]` value is the test-id locator: use By.cssSelector exactly as written.\n");
         guide.append("- Do not driver.get(...) a URL to skip a control that is in the YAML (especially the cart).\n\n");
         guide.append("## Actions\n");
@@ -1529,7 +1595,7 @@ public class SnapshotCapture {
 
                 ## Locator rules
 
-                1. Prefer the highest `score` (data-test css 98, id 92, name 88, linkText 75, css 45-85, xpath 40); never use score <= 40 unless nothing else exists. Prefer stability high (id, name, data-testid).
+                1. Prefer the highest `score` (data-test css 98, id 92, name 88, linkText 75, css 45-85, label/text xpath 60, xpath 40, generated values 20); never use score <= 40 unless nothing else exists. Prefer stability high (id, name, data-testid).
                 2. Never invent elements not in the snapshot.
                 3. Explicit waits; Page Object when style=pageobject.
                 """;
