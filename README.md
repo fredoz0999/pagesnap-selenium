@@ -189,6 +189,9 @@ npm run pack -- stats latest
 npm run pack -- bench latest [--md]             # tokens per approach for the whole flow
 npm run pack -- pom latest --out=../src/test/java/pages [--package=pages]   # Java page objects, no LLM
 npm run pack -- validate latest ../src/test/java      # check every By.* against the snapshots, exit 1 on MISS
+npm run pack -- bdd latest --features=../src/test/resources/features --steps=../src/test/java/steps \
+  --driver="com.acme.DriverManager.getDriver()" [--assertions=testng|junit] [--runner=testng|junit] [--tags=@smoke]
+npm run pack -- prompt latest --cucumber          # agent prompt: pom -> bdd draft -> fill pending -> validate
 npm run pack -- install-prompts ../my-selenium-tests   # /pagesnap-automate and /pagesnap-testcases
 npm run mcp                                     # same query tools as an MCP server (stdio)
 ```
@@ -206,4 +209,17 @@ locator; fragile ones (xpath, `nth-child`, score <= 45) are marked. `PAGES.md` i
 `MISS` = an id or link text that was never captured (invented), `AMBG` = matches several elements, `????` = cannot be
 checked (variable argument, xpath, a name the capture dropped because two stronger locators won).
 
-Not ported: `heal` (rewrites TS specs) and `verify` (live drift check).
+### Cucumber / BDD stacks
+
+`bdd` turns the capture notes into a Cucumber-JVM draft with no LLM: `action:` clauses become `When` steps (click,
+`I enter {string} into the ...`, `I select {string} from the ...`), `assert:` clauses become `Then` steps (displayed,
+enabled/disabled, shows `{string}`, page shows text), and the first step opens the page. Each clause is matched to the
+closest captured control, so a step definition calls the generated page object (`InventoryPage.ADD_TO_CART_FLEECE_JACKET_BUTTON`)
+through explicit waits. A clause that matches nothing becomes a `PendingException` step that names what is missing; an
+un-prefixed note that names no control is kept as a Gherkin comment. Run `pom` first (same `--pages-package`).
+
+Defaults suit a Cucumber + TestNG project: `--assertions=testng`, no runner file (your project has its own), glue package
+`steps`. Point `--driver` at your own accessor (a Serenity or ThreadLocal driver factory). Existing step definitions are
+not read, so review the draft for duplicates before merging; `prompt --cucumber` tells an agent to reuse existing steps.
+
+Not ported: `heal` (rewrites TS specs) and the live `verify` drift check.

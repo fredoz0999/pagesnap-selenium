@@ -98,6 +98,32 @@ export function automatePrompt(o: PromptOpts): string {
   ].filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n");
 }
 
+export function cucumberPrompt(o: PromptOpts): string {
+  const tool = o.tool ?? toolDir();
+  const PACK = packCmd(tool);
+  const S = o.session;
+  return [
+    "Turn the flow captured in the PageSnap session below into a Cucumber (Gherkin + Java step definitions, Selenium) scenario.",
+    "",
+    "Session: " + S,
+    o.goal ? "Goal: " + o.goal : "",
+    "PACK means: " + PACK,
+    "",
+    "1. Run: PACK pom \"" + S + "\" --out=src/test/java/pages   (verified page objects, no LLM)",
+    "2. Run: PACK bdd \"" + S + "\" --features=src/test/resources/features --steps=src/test/java/steps --driver=\"<your driver expression>\"",
+    "   This writes a deterministic first draft. Read the .feature and the step class; do NOT open the NN_*.yaml files.",
+    "3. For every PENDING step the command listed: run PACK query \"" + S + "\" \"<note text>\" --step=<N> and replace the PendingException",
+    "   with code using ONLY a locator shown after `=>` (prefer the page-object member if one exists). Never invent selectors.",
+    "4. Reword Gherkin to business language where the draft reads like UI mechanics, but keep one step definition per sentence",
+    "   and reuse existing step definitions in the project instead of duplicating them (search src/test/java first).",
+    "5. Run: PACK validate \"" + S + "\" src/test/java  (fix every MISS/AMBG), then your Cucumber runner. Max 3 attempts, then stop and report.",
+    "",
+    "Rules: explicit waits only (no Thread.sleep); no driver.get(...) to skip a captured step; end with a business-outcome assertion;",
+    "credentials come from env vars or the data: notes, never hard-coded secrets.",
+    "",
+  ].filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n");
+}
+
 export function testCasesPrompt(o: PromptOpts): string {
   const tool = o.tool ?? toolDir();
   const PACK = packCmd(tool);

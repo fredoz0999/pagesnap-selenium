@@ -3,7 +3,7 @@
  * npm run pack -- build    <session|latest> [--embedder=hash|minilm] [--max-tokens=200]
  * npm run pack -- query    <session|latest> "<step text>" [--k=4] [--step=N] [--diff] [--url=part] [--no-legend] [--json]
  * npm run pack -- stats    <session|latest>
- * npm run pack -- prompt   <session|latest> [--cases] [--name=x]
+ * npm run pack -- prompt   <session|latest> [--cases|--cucumber] [--name=x]
  * npm run pack -- install-prompts <test-repo-dir>
  */
 import fs from "node:fs";
@@ -12,8 +12,9 @@ import { buildIndex, loadIndex, queryIndex, LEAN_DIR } from "./index.js";
 import { ensureIndex, resolveSession, userPath } from "./paths.js";
 import { validateJava } from "./validate.js";
 import { writePom } from "./pom.js";
+import { generateBdd } from "./bdd.js";
 import { bench, benchTmpCopy } from "./bench.js";
-import { automatePrompt, installPrompts, sessionGoal, slugify, testCasesPrompt, writeSessionPrompts } from "./prompts.js";
+import { automatePrompt, cucumberPrompt, installPrompts, sessionGoal, slugify, testCasesPrompt, writeSessionPrompts } from "./prompts.js";
 
 const USAGE = `pagesnap lean pack - token-lean snapshots for coding agents
 
@@ -22,14 +23,16 @@ const USAGE = `pagesnap lean pack - token-lean snapshots for coding agents
   npm run pack -- stats    <session|latest>
   npm run pack -- bench    <session|latest> [--md]
   npm run pack -- validate <session|latest> <File.java|folder>
+  npm run pack -- bdd      <session|latest> [--features=src/test/resources/features] [--steps=src/test/java/steps] [--package=steps] [--pages-package=pages] [--driver="DriverManager.getDriver()"] [--assertions=testng|junit] [--runner=testng|junit] [--tags=@smoke]
   npm run pack -- pom      <session|latest> [--out=src/test/java/pages] [--package=pages]
-  npm run pack -- prompt   <session|latest> [--cases] [--name=checkout-flow]
+  npm run pack -- prompt   <session|latest> [--cases|--cucumber] [--name=checkout-flow]
   npm run pack -- install-prompts <test-repo-dir>
 
 build     compact every NN_*.yaml into lean/NN_*.txt, chunk by UI region, write lean/index.json + lean/PACK.md
 query     hybrid search (keyword + vector + exact name) -> page outline + the few chunks that matter
 stats     raw vs compact token estimate per page
 validate  check every By.* locator in your Java tests/page objects against the snapshots (no LLM tokens). Exit 1 if any is missing.
+bdd       generate a Cucumber .feature + step definitions (Cucumber-JVM) bound to the page objects; unmatched notes become Pending steps
 pom       generate Selenium Java page objects (BasePage + one class per URL path) from the verified locators (no LLM) + PAGES.md map
 bench     tokens an agent reads for the whole flow: raw / compact / query / query+diff / PAGES.md / ariaSnapshot
 prompt    print a ready-to-paste agent prompt for this session (--cases: manual test cases)
@@ -72,6 +75,26 @@ async function main(argv: string[]): Promise<number> {
       console.log("Wrote " + r.files.length + " files to " + out + ": " + r.pages.length + " page classes + BasePage, " + members + " members");
       return 0;
     }
+    case "bdd": {
+      const rt = flag(rest, "runner");
+      const as = flag(rest, "assertions");
+      const r = generateBdd(dir, {
+        featuresDir: userPath(flag(rest, "features") || "src/test/resources/features"),
+        stepsDir: userPath(flag(rest, "steps") || "src/test/java/steps"),
+        stepsPackage: flag(rest, "package"),
+        pagesPackage: flag(rest, "pages-package"),
+        driver: flag(rest, "driver"),
+        assertions: as === "junit" ? "junit" : "testng",
+        runner: rt === "testng" || rt === "junit" ? rt : null,
+        tags: flag(rest, "tags"),
+        baseUrl: flag(rest, "base-url"),
+      });
+      console.log("Wrote " + r.feature + "\n      " + r.steps + (r.runner ? "\n      " + r.runner : ""));
+      console.log(r.generated + " step definition(s), " + r.pending.length + " pending");
+      for (const p of r.pending) console.log("  PENDING step " + p.step + ": " + p.text);
+      console.log("Needs the page objects from `pack pom` (package " + (flag(rest, "pages-package") || "pages") + ") and a WebDriver at " + (flag(rest, "driver") || "DriverManager.getDriver()") + ".");
+      return 0;
+    }
     case "validate": {
       const target = pos[0];
       if (!target) { console.error("validate needs a .java file or folder"); return 1; }
@@ -84,7 +107,7 @@ async function main(argv: string[]): Promise<number> {
       const goal = sessionGoal(dir);
       const opts = { session: dir, name: name || slugify(goal || path.basename(dir)), goal };
       writeSessionPrompts(dir, name);
-      process.stdout.write(rest.includes("--cases") ? testCasesPrompt(opts) : automatePrompt(opts));
+      process.stdout.write(rest.includes("--cases") ? testCasesPrompt(opts) : rest.includes("--cucumber") ? cucumberPrompt(opts) : automatePrompt(opts));
       return 0;
     }
     case "build": {

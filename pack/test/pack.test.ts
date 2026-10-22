@@ -67,3 +67,32 @@ describe("java page objects and validation", () => {
     expect(rep.counts).toEqual({ ok: 2, missing: 1, ambiguous: 0, unverified: 1 });
   });
 });
+
+describe("cucumber generation", () => {
+  it("writes a feature and step definitions bound to page-object constants, and marks unmatched notes pending", async () => {
+    const { generateBdd } = await import("../src/bdd.js");
+    const dir = copyFixture();
+    // add an assert that matches nothing captured
+    const f = fs.readdirSync(dir).find((n) => n.startsWith("03_"))!;
+    const p = path.join(dir, f);
+    fs.writeFileSync(p, fs.readFileSync(p, "utf8").replace(/# Note: .*/, "# Note: assert: loyalty points are credited"));
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "ps-bdd-"));
+    const r = generateBdd(dir, { featuresDir: path.join(out, "features"), stepsDir: path.join(out, "steps"), runner: "testng", driver: "com.acme.DriverManager.getDriver()" });
+    expect(r.gherkin).toContain("When I click the add to cart fleece jacket button");
+    expect(r.gherkin).toContain("Given I am on the home page");
+    const steps = fs.readFileSync(r.steps, "utf8");
+    expect(steps).toContain('@When("I click the add to cart fleece jacket button")');
+    expect(steps).toContain("clickable(InventoryPage.ADD_TO_CART_FLEECE_JACKET_BUTTON).click();");
+    expect(steps).toContain("com.acme.DriverManager.getDriver()");
+    expect(r.pending.map((x) => x.text)).toEqual(["loyalty points are credited"]);
+    expect(steps).toContain("PendingException");
+    expect(fs.readFileSync(r.runner!, "utf8")).toContain("AbstractTestNGCucumberTests");
+  });
+
+  it("splits note clauses by prefix", async () => {
+    const { parseNote } = await import("../src/bdd.js");
+    expect(parseNote("action: enter user data: user=standard_user assert: login ok")).toEqual([
+      { kind: "action", text: "enter user" }, { kind: "data", text: "user=standard_user" }, { kind: "assert", text: "login ok" },
+    ]);
+  });
+});
