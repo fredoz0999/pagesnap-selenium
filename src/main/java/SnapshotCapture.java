@@ -1656,9 +1656,9 @@ public class SnapshotCapture {
     @SuppressWarnings("unchecked")
     /** Same URL + same note within this window is a double-fire, not a second step. */
     static final long DUP_WINDOW_MS = 2500;
-    private long lastCaptureAtMs;
-    private String lastCaptureUrl;
-    private String lastCaptureNote;
+    private long dupCaptureAtMs;
+    private String dupCaptureUrl;
+    private String dupCaptureNote;
 
     /**
      * Collapse doubled prefixes and glued duplicates from the note dialog:
@@ -1703,13 +1703,13 @@ public class SnapshotCapture {
             }
 
             long nowMs = System.currentTimeMillis();
-            if (isDuplicateCapture(lastCaptureAtMs, lastCaptureUrl, lastCaptureNote, nowMs, url, note)) {
+            if (isDuplicateCapture(dupCaptureAtMs, dupCaptureUrl, dupCaptureNote, nowMs, url, note)) {
                 System.out.println("  Skipped duplicate capture");
                 return false;
             }
-            lastCaptureAtMs = nowMs;
-            lastCaptureUrl = url;
-            lastCaptureNote = note;
+            dupCaptureAtMs = nowMs;
+            dupCaptureUrl = url;
+            dupCaptureNote = note;
 
             waitForDomReady(js, 300, 5000);
 
