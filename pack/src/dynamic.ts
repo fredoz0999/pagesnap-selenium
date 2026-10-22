@@ -31,6 +31,7 @@ export function locatorHasDynamic(by: string, value: string): boolean {
   if (by === "linkText" || by === "partialLinkText") return false;
   const parts: string[] = [];
   value.replace(/"([^"]*)"/g, (m, g) => { parts.push(g); return m; });
+  value.replace(/'([^']*)'/g, (m, g) => { parts.push(g); return m; });
   value.replace(/[#.]([A-Za-z_][-\w]*)/g, (m, g) => { parts.push(g); return m; });
   return parts.some(isDynamicValue);
 }

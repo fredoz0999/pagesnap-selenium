@@ -66,7 +66,7 @@ describe("java page objects and validation", () => {
       '// By.id("commented-out")',
     ].join("\n"));
     const rep = validateJava(FIXTURE, f);
-    expect(rep.counts).toEqual({ ok: 2, missing: 1, ambiguous: 0, unverified: 1, dynamic: 2 });
+    expect(rep.counts).toEqual({ ok: 2, missing: 1, ambiguous: 0, unverified: 1, dynamic: 2, fragile: 0 });
     expect(rep.findings.filter((x) => x.status === "dynamic").map((x) => x.detail).join(" ")).toContain("changes between runs");
   });
 });

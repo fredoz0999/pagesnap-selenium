@@ -13,7 +13,7 @@ import path from "node:path";
 import { parseSnapshot, walk, type Snapshot } from "./parse.js";
 import { snapshotFiles } from "./index.js";
 
-export type Status = "ok" | "missing" | "ambiguous" | "unverified" | "dynamic";
+export type Status = "ok" | "missing" | "ambiguous" | "unverified" | "dynamic" | "fragile";
 
 export interface Finding {
   file: string;
@@ -54,7 +54,7 @@ export function inventoryOf(snap: Snapshot): Inventory {
   return inv;
 }
 
-interface Call {
+export interface Call {
   line: number;
   call: string;
   kind: "id" | "name" | "css" | "linkText" | "partialLinkText" | "xpath" | "className";
@@ -81,6 +81,28 @@ export function extractCalls(src: string): Call[] {
     }
   });
   return calls;
+}
+
+/**
+ * Hand-written XPath / css review. Relative paths anchored on text, a label, a stable attribute or an axis
+ * (following-sibling, parent, ancestor, contains) are how SDETs keep locators alive; absolute paths and
+ * index-only chains break on the first layout change.
+ */
+export function lintXpath(x: string): string | null {
+  const t = x.trim().replace(/^\(+/, "");
+  if (/^\/(?!\/)/.test(t)) return "absolute XPath (/html/...) breaks on any layout change - anchor it: //label[normalize-space()='X']/following-sibling::input";
+  const anchored = /@[\w-]+|text\(\)|normalize-space|contains\(|starts-with\(|::/.test(t);
+  const indexes = (t.match(/\[\d+\]/g) || []).length;
+  if (!anchored && indexes >= 1) return "index-only XPath (" + indexes + " position predicate(s), no text/attribute anchor) breaks when items are added or reordered";
+  if (!anchored) return "XPath has no text, attribute or axis anchor - it matches by tag structure only";
+  if (indexes >= 3) return "XPath leans on " + indexes + " position predicates - anchor on row/card text instead (//td[normalize-space()='X']/following-sibling::td)";
+  return null;
+}
+
+export function lintCss(c: string): string | null {
+  const nth = (c.match(/:nth-(child|of-type)\(/g) || []).length;
+  if (nth >= 2) return "positional css (" + nth + " nth-child steps) breaks when the layout changes - use a stable attribute or an anchored XPath";
+  return null;
 }
 
 function check(file: string, call: Call, invs: Inventory[]): Finding {
@@ -118,10 +140,14 @@ function check(file: string, call: Call, invs: Inventory[]): Finding {
       if (idm) return steps((i) => i.ids.get(idm[1]) || 0) || f("missing", "no id '" + idm[1] + "' in any snapshot");
       // A test id always outranks the other locators, so a data-test css that no snapshot recorded does not exist on a captured page.
       if (/^\[data-(?:testid|test|test-id|cy|qa)=/.test(arg)) return f("missing", "no test id " + arg + " in any snapshot");
-      return f("unverified", "css not recorded in a snapshot - verify by running (or recapture with the control focused)");
+      const cl = lintCss(arg);
+      if (cl) return f("fragile", cl);
+      return f("unverified", "css not recorded in a snapshot - check it live: pack verify <session> --java=<file>");
     }
     case "xpath":
-      return invs.some((i) => i.xpath.has(arg)) ? f("ok", "xpath from snapshot") : f("unverified", "xpath not from snapshot - fragile");
+      if (invs.some((i) => i.xpath.has(arg))) return f("ok", "xpath from snapshot");
+      { const xl = lintXpath(arg); if (xl) return f("fragile", xl); }
+      return f("unverified", "hand-written relative XPath (anchored) - not in a snapshot; check it live: pack verify <session> --java=<file>");
     case "className":
       return f("unverified", "class names are not recorded in snapshots");
   }
@@ -131,7 +157,7 @@ export function loadInventories(sessionDir: string): Inventory[] {
   return snapshotFiles(sessionDir).map((f) => inventoryOf(parseSnapshot(fs.readFileSync(path.join(sessionDir, f), "utf8"), f)));
 }
 
-function javaFiles(p: string): string[] {
+export function javaFiles(p: string): string[] {
   const st = fs.statSync(p);
   if (st.isFile()) return [p];
   const out: string[] = [];
@@ -158,14 +184,14 @@ export function validateJava(sessionDir: string, target: string): ValidateReport
     const rel = path.relative(path.dirname(target), file) || path.basename(file);
     return extractCalls(fs.readFileSync(file, "utf8")).map((c) => check(rel, c, invs));
   });
-  const counts: Record<Status, number> = { ok: 0, missing: 0, ambiguous: 0, unverified: 0, dynamic: 0 };
+  const counts: Record<Status, number> = { ok: 0, missing: 0, ambiguous: 0, unverified: 0, dynamic: 0, fragile: 0 };
   findings.forEach((x) => counts[x.status]++);
-  const icon: Record<Status, string> = { ok: "OK  ", missing: "MISS", ambiguous: "AMBG", unverified: "????", dynamic: "DYN " };
+  const icon: Record<Status, string> = { ok: "OK  ", missing: "MISS", ambiguous: "AMBG", unverified: "????", dynamic: "DYN ", fragile: "FRAG" };
   const lines = [
     "pagesnap validate: " + files.length + " java file(s) vs " + invs.length + " snapshot(s)",
     ...findings.map((x) => icon[x.status] + " " + x.file + ":" + x.line + "  " + x.call + "  - " + x.detail),
     "",
-    "ok " + counts.ok + " | missing " + counts.missing + " | ambiguous " + counts.ambiguous + " | unverified " + counts.unverified + " | dynamic " + counts.dynamic,
+    "ok " + counts.ok + " | missing " + counts.missing + " | ambiguous " + counts.ambiguous + " | unverified " + counts.unverified + " | dynamic " + counts.dynamic + " | fragile " + counts.fragile,
   ];
   return { findings, counts, text: lines.join("\n") + "\n" };
 }
