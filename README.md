@@ -183,7 +183,8 @@ What the capture records for each control, best first (`score`):
 | `By.name` | 88 | only if the value is stable |
 | `By.linkText` | 75 | visible text |
 | css (aria-label, placeholder, href, prefix) | 45-85 | by stability |
-| label / button-text xpath | 60 | used when id, name and test id are missing or generated |
+| anchored relative xpath | 60 | used when id, name and test id are missing, generated or repeated (see below) |
+| positional css (`nth-child`) | 45 | last resort, controls only; dropped once anything scores 60+ |
 | other xpath | 40 | last resort |
 | generated value (see below) | 20 | listed only when nothing stable exists |
 
@@ -193,6 +194,30 @@ What the capture records for each control, best first (`score`):
 button text, or a unique stable prefix (`[data-test^="category-"]`). `pack validate` fails (`DYN`) on tests that use one, `pack pom`
 marks it `DYNAMIC`, and `pack heal` never suggests one. The rule lives in `isDynamicValue` (capture JS) and `pack/src/dynamic.ts`;
 a test keeps the two identical.
+
+**Anchored relative XPath** - written the way SDETs hand-write it, and only kept if it matches exactly one element:
+
+| Pattern | Example |
+|---|---|
+| visible text | `//button[normalize-space()='Pay now']` |
+| label -> control | `//label[normalize-space()='Street']/following-sibling::input[1]` (or `//label[...]//input` when wrapped) |
+| caption sibling | `//span[normalize-space()='Quantity']/following-sibling::input[@type='number'][1]` |
+| table row | `//td[normalize-space()='Alice Smith']/following-sibling::td//button[normalize-space()='Edit']` |
+| repeated card | `//h5[normalize-space()='Claw Hammer']/ancestor::a[contains(@class,'card')][1]//button[@data-test='compare-btn']` |
+| parent | `//h5[normalize-space()='Thor Hammer']/parent::div//button[normalize-space()='Add to cart']` |
+| stable ancestor | `//div[@id='filters']//input[@type='checkbox']` |
+| stable prefix (weakest) | `//input[starts-with(@id,'mat-input-')]` |
+
+Prices, counts and record numbers are never used as anchors (they are data).
+
+**Your own hand-written locators**
+- `pack validate <session> <src/test/java>` reviews them without a browser: `FRAG` for absolute XPath (`/html/body/...`), index-only
+  chains (`//div[3]/div[1]/...`), XPath with no text/attribute/axis anchor, and positional css; `DYN` for generated values (also in
+  single-quoted XPath like `@id='mat-input-4'`). Anchored relative XPath (text, `@attr`, `contains()`, `following-sibling::`,
+  `parent::`, `ancestor::`) passes the review.
+- `pack verify <session> --java=<src/test/java>` proves them live: every `By.*` literal is counted on each captured page -
+  `OK` (exactly one match), `AMBG` (several: Selenium silently takes the first), `GONE` (typo or the element changed). Link text is
+  matched on visible text, as Selenium does. Pages behind login need `--storage`.
 
 ## Sibling
 
