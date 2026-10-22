@@ -69,7 +69,9 @@ interface Cand { m: PomMember; owner: string; doc: string[] }
 const STOPWORDS = new Set(["click", "press", "tap", "enter", "type", "fill", "select", "choose", "check", "see", "the", "a", "an", "to", "on", "in", "into", "from", "of", "is", "are", "and", "page", "button", "link", "field", "input"]);
 
 function rank(text: string, cands: Cand[], idf: (t: string) => number): { best: Cand; score: number; margin: number } | null {
-  const want = [...new Set(tokenize(text))].filter((t) => !STOPWORDS.has(t));
+  const known = new Set(cands.flatMap((c) => c.doc));
+  // Words that name no captured control are verbs ("open", "go to"): they must not dilute the match.
+  const want = [...new Set(tokenize(text))].filter((t) => !STOPWORDS.has(t) && known.has(t));
   if (!want.length || !cands.length) return null;
   const wsum = want.reduce((a, t) => a + idf(t), 0);
   const scored = cands.map((c) => {
@@ -78,7 +80,10 @@ function rank(text: string, cands: Cand[], idf: (t: string) => number): { best: 
     const extra = [...have].filter((t) => !want.includes(t) && !STOPWORDS.has(t)).reduce((a, t) => a + idf(t), 0);
     return { c, score: hit / wsum - 0.05 * (extra / Math.max(1, wsum)) };
   }).sort((a, b) => b.score - a.score);
-  const [a, b] = scored;
+  const [a] = scored;
+  // Duplicates of the same control (header + footer "About Us") tie by construction; they are not ambiguity.
+  const sameDoc = (x: Cand) => x.m.name === a.c.m.name && x.m.role === a.c.m.role;
+  const b = scored.slice(1).find((r) => !sameDoc(r.c));
   return { best: a.c, score: a.score, margin: a.score - (b ? b.score : 0) };
 }
 

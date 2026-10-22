@@ -230,5 +230,5 @@ export function compactSnapshot(snap: Snapshot, opts: CompactOptions = {}): stri
 export const LEGEND =
   "Legend: one node per line, 1-space indent = nesting. `=> x` is the verified locator (Selenium Java): " +
   "#id / id=V -> By.id(\"V\"); [name=V] -> By.name(\"V\"); css=S -> By.cssSelector(S) (a [data-test=\"x\"] css is the test id); " +
-  "linkText=T -> By.linkText(T); xpath=X -> By.xpath(X). \"in=\" / \"dup k/n\" flags disambiguate repeats. " +
+  "a bare `link` = By.linkText(<the quoted name>); link=T -> By.linkText(T); xpath=X -> By.xpath(X). \"in=\" / \"dup k/n\" flags disambiguate repeats. " +
   "Never invent locators that are not shown.";

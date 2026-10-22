@@ -89,6 +89,15 @@ describe("cucumber generation", () => {
     expect(fs.readFileSync(r.runner!, "utf8")).toContain("AbstractTestNGCucumberTests");
   });
 
+  it("binds a note to a control that appears twice (header + footer) on a real ParaBank capture", async () => {
+    const { generateBdd } = await import("../src/bdd.js");
+    const dir = path.join(__dirname, "fixtures", "session-parabank");
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "ps-bdd-pb-"));
+    const r = generateBdd(dir, { featuresDir: path.join(out, "features"), stepsDir: path.join(out, "steps"), runner: "testng", driver: "com.acme.DriverManager.getDriver()" });
+    expect(r.pending).toEqual([]);
+    expect(fs.readFileSync(r.steps, "utf8")).toContain("clickable(BasePage.ABOUT_US_LINK).click();");
+  });
+
   it("splits note clauses by prefix", async () => {
     const { parseNote } = await import("../src/bdd.js");
     expect(parseNote("action: enter user data: user=standard_user assert: login ok")).toEqual([

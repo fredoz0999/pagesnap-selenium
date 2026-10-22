@@ -1,0 +1,200 @@
+# URL: https://parabank.parasoft.com/parabank/index.htm
+# Captured: 2026-10-22T02:12:57.867123283Z
+# Trigger: manual
+# Step: 1
+# Note: action: open the About Us page
+# Session goal: Open ParaBank and read the About page
+
+- img
+- img "ParaBank"
+- list
+  - listitem
+  - listitem
+    - link "About Us" [dup 1/2]:
+      locators:
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Services" [dup 1/2]:
+      locators:
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(3) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Products" [dup 1/2]:
+      locators:
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(4) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Locations" [dup 1/2]:
+      locators:
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(5) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Admin Page":
+      locators:
+        - {by: linkText, value: "Admin Page", stability: medium, score: 75}
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(6) > a:nth-child(1)", stability: low, score: 45}
+- list
+  - listitem
+    - link "home":
+      locators:
+        - {by: linkText, value: "home", stability: medium, score: 75}
+        - {by: css, value: "#headerPanel > ul:nth-child(2) > li:nth-child(1) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "about":
+      locators:
+        - {by: linkText, value: "about", stability: medium, score: 75}
+        - {by: css, value: "#headerPanel > ul:nth-child(2) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "contact":
+      locators:
+        - {by: linkText, value: "contact", stability: medium, score: 75}
+        - {by: css, value: "#headerPanel > ul:nth-child(2) > li:nth-child(3) > a:nth-child(1)", stability: low, score: 45}
+- heading "Customer Login" [level=2]
+- form:
+  locators:
+    - {by: name, value: "login", stability: high, score: 88}
+  - textbox "username":
+    value: ""
+    locators:
+      - {by: name, value: "username", stability: high, score: 88}
+  - textbox "password":
+    value: "***"
+    locators:
+      - {by: name, value: "password", stability: high, score: 88}
+  - button:
+    value: "Log In"
+    locators:
+      - {by: css, value: "input[type=\"submit\"][value=\"Log In\"]", stability: medium, score: 65}
+      - {by: xpath, value: "//button[normalize-space()=\"Log In\"] | //input[@type=\"submit\" and @value=\"Log In\"]", stability: medium, score: 40}
+- link "Forgot login info?":
+  locators:
+    - {by: linkText, value: "Forgot login info?", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"lookup.htm\"]", stability: medium, score: 65}
+- link "Register":
+  locators:
+    - {by: linkText, value: "Register", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"register.htm\"]", stability: medium, score: 65}
+- list
+  - listitem
+  - listitem
+    - link "Withdraw Funds":
+      locators:
+        - {by: linkText, value: "Withdraw Funds", stability: medium, score: 75}
+        - {by: css, value: "#rightPanel > ul:nth-child(2) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Transfer Funds" [dup 1/2]:
+      locators:
+        - {by: css, value: "#rightPanel > ul:nth-child(2) > li:nth-child(3) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Check Balances":
+      locators:
+        - {by: linkText, value: "Check Balances", stability: medium, score: 75}
+        - {by: css, value: "#rightPanel > ul:nth-child(2) > li:nth-child(4) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Make Deposits":
+      locators:
+        - {by: linkText, value: "Make Deposits", stability: medium, score: 75}
+        - {by: css, value: "#rightPanel > ul:nth-child(2) > li:nth-child(5) > a:nth-child(1)", stability: low, score: 45}
+- list
+  - listitem
+  - listitem
+    - link "Bill Pay":
+      locators:
+        - {by: linkText, value: "Bill Pay", stability: medium, score: 75}
+        - {by: css, value: "#rightPanel > ul:nth-child(3) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Account History":
+      locators:
+        - {by: linkText, value: "Account History", stability: medium, score: 75}
+        - {by: css, value: "#rightPanel > ul:nth-child(3) > li:nth-child(3) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Transfer Funds" [dup 2/2]:
+      locators:
+        - {by: css, value: "#rightPanel > ul:nth-child(3) > li:nth-child(4) > a:nth-child(1)", stability: low, score: 45}
+- link "READ MORE" [dup 1/2]:
+  locators:
+    - {by: css, value: "#rightPanel > p:nth-child(4) > a:nth-child(1)", stability: low, score: 45}
+- heading "LATEST NEWS" [level=4]
+- list
+  - listitem
+  - listitem
+    - link "ParaBank Is Now Re-Opened":
+      locators:
+        - {by: linkText, value: "ParaBank Is Now Re-Opened", stability: medium, score: 75}
+        - {by: css, value: "#rightPanel > ul:nth-child(6) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "New! Online Bill Pay":
+      locators:
+        - {by: linkText, value: "New! Online Bill Pay", stability: medium, score: 75}
+        - {by: css, value: "#rightPanel > ul:nth-child(6) > li:nth-child(3) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "New! Online Account Transfers":
+      locators:
+        - {by: linkText, value: "New! Online Account Transfers", stability: medium, score: 75}
+        - {by: css, value: "#rightPanel > ul:nth-child(6) > li:nth-child(4) > a:nth-child(1)", stability: low, score: 45}
+- link "READ MORE" [dup 2/2]:
+  locators:
+    - {by: css, value: "#rightPanel > p:nth-child(7) > a:nth-child(1)", stability: low, score: 45}
+- list
+  - listitem
+    - link "Home":
+      locators:
+        - {by: linkText, value: "Home", stability: medium, score: 75}
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(1) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "About Us" [dup 2/2]:
+      locators:
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Services" [dup 2/2]:
+      locators:
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(3) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Products" [dup 2/2]:
+      locators:
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(4) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Locations" [dup 2/2]:
+      locators:
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(5) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Site Map":
+      locators:
+        - {by: linkText, value: "Site Map", stability: medium, score: 75}
+        - {by: css, value: "a[href*=\"sitemap.htm\"]", stability: medium, score: 65}
+  - listitem
+    - link "Contact Us":
+      locators:
+        - {by: linkText, value: "Contact Us", stability: medium, score: 75}
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(7) > a:nth-child(1)", stability: low, score: 45}
+- list
+  - listitem
+  - listitem
+    - link "www.parasoft.com":
+      locators:
+        - {by: linkText, value: "www.parasoft.com", stability: medium, score: 75}
+        - {by: css, value: "#footerPanel > ul:nth-child(3) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+
+# --- Selenium hints (best-effort; prefer high-stability locators) ---
+# About Us (1/2): driver.findElement(By.cssSelector("#headerPanel > ul:nth-child(1) > li:nth-child(2) > a:nth-child(1)"))
+# Services (1/2): driver.findElement(By.cssSelector("#headerPanel > ul:nth-child(1) > li:nth-child(3) > a:nth-child(1)"))
+# Products (1/2): driver.findElement(By.cssSelector("#headerPanel > ul:nth-child(1) > li:nth-child(4) > a:nth-child(1)"))
+# Locations (1/2): driver.findElement(By.cssSelector("#headerPanel > ul:nth-child(1) > li:nth-child(5) > a:nth-child(1)"))
+# Admin Page: driver.findElement(By.linkText("Admin Page"))
+# home: driver.findElement(By.linkText("home"))
+# about: driver.findElement(By.linkText("about"))
+# contact: driver.findElement(By.linkText("contact"))
+# form: driver.findElement(By.name("login"))
+# username: driver.findElement(By.name("username"))
+# password: driver.findElement(By.name("password"))
+# button: driver.findElement(By.cssSelector("input[type=\"submit\"][value=\"Log In\"]"))
+# Forgot login info?: driver.findElement(By.linkText("Forgot login info?"))
+# Register: driver.findElement(By.linkText("Register"))
+# Withdraw Funds: driver.findElement(By.linkText("Withdraw Funds"))
+# Transfer Funds (1/2): driver.findElement(By.cssSelector("#rightPanel > ul:nth-child(2) > li:nth-child(3) > a:nth-child(1)"))
+# Check Balances: driver.findElement(By.linkText("Check Balances"))
+# Make Deposits: driver.findElement(By.linkText("Make Deposits"))
+# Bill Pay: driver.findElement(By.linkText("Bill Pay"))
+# Account History: driver.findElement(By.linkText("Account History"))
+# Transfer Funds (2/2): driver.findElement(By.cssSelector("#rightPanel > ul:nth-child(3) > li:nth-child(4) > a:nth-child(1)"))
+# READ MORE (1/2): driver.findElement(By.cssSelector("#rightPanel > p:nth-child(4) > a:nth-child(1)"))
+# ParaBank Is Now Re-Opened: driver.findElement(By.linkText("ParaBank Is Now Re-Opened"))
+# New! Online Bill Pay: driver.findElement(By.linkText("New! Online Bill Pay"))
+# … 10 more hints truncated
