@@ -172,6 +172,28 @@ Cookie files are secrets — do not commit them.
 - Cross-origin iframes are listed but not inspected.
 - No screenshots — YAML tree + locators only.
 
+## Locator rules
+
+What the capture records for each control, best first (`score`):
+
+| Locator | Score | Notes |
+|---|---|---|
+| `data-test` / `data-testid` / `data-cy` / `data-qa` css | 98 | only if the value is stable |
+| `By.id` | 92 | only if the value is stable |
+| `By.name` | 88 | only if the value is stable |
+| `By.linkText` | 75 | visible text |
+| css (aria-label, placeholder, href, prefix) | 45-85 | by stability |
+| label / button-text xpath | 60 | used when id, name and test id are missing or generated |
+| other xpath | 40 | last resort |
+| generated value (see below) | 20 | listed only when nothing stable exists |
+
+**A value that changes between runs is never a valid locator**, in any attribute: ULIDs and UUIDs, long hex hashes, 3+ digit runs
+(`input-8472`), framework counters (`mat-input-4`, `ember1234`, `react-select-3-input`, `:r1:`), and hashed CSS classes (`css-1x2y3z`,
+`Button_primary__x7Gh2`). The capture drops such a locator whenever a stable one exists and falls back to label text, placeholder,
+button text, or a unique stable prefix (`[data-test^="category-"]`). `pack validate` fails (`DYN`) on tests that use one, `pack pom`
+marks it `DYNAMIC`, and `pack heal` never suggests one. The rule lives in `isDynamicValue` (capture JS) and `pack/src/dynamic.ts`;
+a test keeps the two identical.
+
 ## Sibling
 
 Playwright / TypeScript capture: https://github.com/fredoz0999/pagesnap-playwright
