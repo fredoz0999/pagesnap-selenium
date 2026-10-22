@@ -1,0 +1,45 @@
+# URL: https://shop.test/index.html
+# Captured: 2026-10-21T21:00:00-04:00
+# Trigger: manual
+# Step: 1
+# Note: Open the login page
+# Session goal: Buy a fleece jacket
+
+- banner
+  - link "Home":
+    locators:
+      - {by: css, value: "[data-test=\"home\"]", stability: high, score: 98}
+  - link "About":
+    locators:
+      - {by: linkText, value: "About", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"/about\"]", stability: medium, score: 65}
+  - link "Help":
+    locators:
+      - {by: linkText, value: "Help", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"/help\"]", stability: medium, score: 65}
+  - link "0":
+    locators:
+      - {by: css, value: "[data-test=\"shopping-cart-link\"]", stability: high, score: 98}
+    - generic:
+      locators:
+        - {by: css, value: "[data-test=\"shopping-cart-badge\"]", stability: high, score: 98}
+- main
+  - heading "Login" [level=1]
+  - form:
+    locators:
+      - {by: css, value: "html:nth-child(1) > body:nth-child(2) > main:nth-child(2) > form:nth-child(2)", stability: low, score: 45}
+    - textbox "Username":
+      value: ""
+      locators:
+        - {by: css, value: "[data-test=\"username\"]", stability: high, score: 98}
+        - {by: id, value: "user-name", stability: high, score: 92}
+    - textbox "Password":
+      value: "***"
+      locators:
+        - {by: css, value: "[data-test=\"password\"]", stability: high, score: 98}
+        - {by: id, value: "password", stability: high, score: 92}
+    - button "login-button":
+      value: "Login"
+      locators:
+        - {by: css, value: "[data-test=\"login-button\"]", stability: high, score: 98}
+        - {by: id, value: "login-button", stability: high, score: 92}

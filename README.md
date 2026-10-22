@@ -175,3 +175,25 @@ Cookie files are secrets — do not commit them.
 ## Sibling
 
 Playwright / TypeScript capture: https://github.com/fredoz0999/pagesnap-playwright
+
+## Token-lean pack (compact + retrieval)
+
+A Node sidecar in [`pack/`](pack) ported from `pagesnap-playwright`'s `feat/token-lean-retrieval`. It reads the same
+YAML session folders and gives an agent only the UI for the step it is on instead of every `NN_*.yaml`.
+
+```
+cd pack && npm install
+npm run pack -- build latest                    # lean/ : compact snapshots, region chunks, index, PACK.md, prompts
+npm run pack -- query latest "add the Fleece Jacket to the cart" --step=2 --diff
+npm run pack -- stats latest
+npm run pack -- bench latest [--md]             # tokens per approach for the whole flow
+npm run pack -- install-prompts ../my-selenium-tests   # /pagesnap-automate and /pagesnap-testcases
+npm run mcp                                     # same query tools as an MCP server (stdio)
+```
+
+Run from the repo root where `pageSnapshots/` lives (or set `PAGESNAP_CWD`). Query ranking is hybrid: BM25 keywords +
+vector cosine (dependency-free hashing embedder; `--embedder=minilm` after `npm i -D @huggingface/transformers`) +
+an exact accessible-name bonus. A weak match falls back to the whole compact page. Locators come back as
+`=> css=[data-test="x"]`, `#id`, `[name=V]`, `linkText=`, `xpath=` and map directly to `By.*`.
+
+Not ported (Playwright-specific): `pom` (TS page objects), `validate`/`heal` (parse TS specs), `verify` (live drift check).

@@ -1,0 +1,63 @@
+# URL: https://shop.test/inventory.html
+# Captured: 2026-10-21T21:00:01-04:00
+# Trigger: manual
+# Step: 2
+# Note: action: add the Fleece Jacket to the cart
+# Session goal: Buy a fleece jacket
+
+- banner
+  - link "Home":
+    locators:
+      - {by: css, value: "[data-test=\"home\"]", stability: high, score: 98}
+  - link "About":
+    locators:
+      - {by: linkText, value: "About", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"/about\"]", stability: medium, score: 65}
+  - link "Help":
+    locators:
+      - {by: linkText, value: "Help", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"/help\"]", stability: medium, score: 65}
+  - link "0":
+    locators:
+      - {by: css, value: "[data-test=\"shopping-cart-link\"]", stability: high, score: 98}
+    - generic:
+      locators:
+        - {by: css, value: "[data-test=\"shopping-cart-badge\"]", stability: high, score: 98}
+- main
+  - heading "Products" [level=1]
+  - combobox:
+    value: "Name (A to Z)"
+    locators:
+      - {by: css, value: "[data-test=\"sort\"]", stability: high, score: 98}
+    options:  # native <select> - available without opening UI
+      - option "Name (A to Z)" [selected]
+      - option "Price (low to high)"
+  - heading "Backpack" [level=3]
+  - button "Add to cart" [dup 1/6]:
+    locators:
+      - {by: css, value: "[data-test=\"add-to-cart-backpack\"]", stability: high, score: 98}
+  - heading "Bike Light" [level=3]
+  - button "Add to cart" [dup 2/6]:
+    locators:
+      - {by: css, value: "[data-test=\"add-to-cart-bike-light\"]", stability: high, score: 98}
+  - heading "Bolt T-Shirt" [level=3]
+  - button "Add to cart" [dup 3/6]:
+    locators:
+      - {by: css, value: "[data-test=\"add-to-cart-bolt-t-shirt\"]", stability: high, score: 98}
+  - heading "Fleece Jacket" [level=3]
+  - button "Add to cart" [dup 4/6]:
+    locators:
+      - {by: css, value: "[data-test=\"add-to-cart-fleece-jacket\"]", stability: high, score: 98}
+  - heading "Onesie" [level=3]
+  - button "Add to cart" [dup 5/6]:
+    locators:
+      - {by: css, value: "[data-test=\"add-to-cart-onesie\"]", stability: high, score: 98}
+  - heading "Red T-Shirt" [level=3]
+  - button "Add to cart" [dup 6/6]:
+    locators:
+      - {by: css, value: "[data-test=\"add-to-cart-red-t-shirt\"]", stability: high, score: 98}
+
+# --- All <select> options ---
+# <select> "unnamed":
+#   - Name (A to Z) (selected)
+#   - Price (low to high)

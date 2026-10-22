@@ -1,0 +1,37 @@
+# URL: https://shop.test/cart.html
+# Captured: 2026-10-21T21:00:02-04:00
+# Trigger: manual
+# Step: 3
+# Note: assert: cart lists the Fleece Jacket and Checkout is enabled
+# Session goal: Buy a fleece jacket
+
+- banner
+  - link "Home":
+    locators:
+      - {by: css, value: "[data-test=\"home\"]", stability: high, score: 98}
+  - link "About":
+    locators:
+      - {by: linkText, value: "About", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"/about\"]", stability: medium, score: 65}
+  - link "Help":
+    locators:
+      - {by: linkText, value: "Help", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"/help\"]", stability: medium, score: 65}
+  - link "0":
+    locators:
+      - {by: css, value: "[data-test=\"shopping-cart-link\"]", stability: high, score: 98}
+    - generic:
+      locators:
+        - {by: css, value: "[data-test=\"shopping-cart-badge\"]", stability: high, score: 98}
+- main
+  - heading "Your Cart" [level=1]
+  - heading "Fleece Jacket" [level=3]
+  - button "Remove":
+    locators:
+      - {by: css, value: "[data-test=\"remove-fleece-jacket\"]", stability: high, score: 98}
+  - button "Continue Shopping":
+    locators:
+      - {by: css, value: "[data-test=\"continue-shopping\"]", stability: high, score: 98}
+  - button "Checkout":
+    locators:
+      - {by: css, value: "[data-test=\"checkout\"]", stability: high, score: 98}
