@@ -66,12 +66,10 @@ const humanize = (prop: string) => prop.replace(/([a-z0-9])([A-Z])/g, "$1 $2").t
 const quoted = (s: string): string[] => [...s.matchAll(/"([^"]+)"|'([^']+)'|“([^”]+)”/g)].map((m) => m[1] ?? m[2] ?? m[3]);
 
 interface Cand { m: PomMember; owner: string; doc: string[] }
-const STOPWORDS = new Set(["click", "press", "tap", "enter", "type", "fill", "select", "choose", "check", "see", "the", "a", "an", "to", "on", "in", "into", "from", "of", "is", "are", "and", "page", "button", "link", "field", "input"]);
+const STOPWORDS = new Set(["click", "press", "tap", "enter", "type", "fill", "select", "choose", "check", "see", "the", "a", "an", "to", "on", "in", "into", "from", "of", "is", "are", "and", "page", "button", "link", "field", "input", "open", "go", "navigate", "visit", "goto", "view"]);
 
 function rank(text: string, cands: Cand[], idf: (t: string) => number): { best: Cand; score: number; margin: number } | null {
-  const known = new Set(cands.flatMap((c) => c.doc));
-  // Words that name no captured control are verbs ("open", "go to"): they must not dilute the match.
-  const want = [...new Set(tokenize(text))].filter((t) => !STOPWORDS.has(t) && known.has(t));
+  const want = [...new Set(tokenize(text))].filter((t) => !STOPWORDS.has(t));
   if (!want.length || !cands.length) return null;
   const wsum = want.reduce((a, t) => a + idf(t), 0);
   const scored = cands.map((c) => {

@@ -98,6 +98,17 @@ describe("cucumber generation", () => {
     expect(fs.readFileSync(r.steps, "utf8")).toContain("clickable(BasePage.ABOUT_US_LINK).click();");
   });
 
+  it("names a page after the resource, not a generated id, and never binds a note on one shared word (real Toolshop capture)", async () => {
+    const { buildPom } = await import("../src/pom.js");
+    const { generateBdd } = await import("../src/bdd.js");
+    const dir = path.join(__dirname, "fixtures", "session-toolshop");
+    expect(buildPom(dir).pages.map((p) => p.className)).toContain("ProductPage");
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "ps-bdd-ts-"));
+    const r = generateBdd(dir, { featuresDir: path.join(out, "features"), stepsDir: path.join(out, "steps"), runner: "testng", driver: "com.acme.DriverManager.getDriver()" });
+    expect(r.gherkin).not.toMatch(/register your account/i);
+    expect(r.pending.map((x) => x.text)).toContain("log in with the demo customer account");
+  });
+
   it("splits note clauses by prefix", async () => {
     const { parseNote } = await import("../src/bdd.js");
     expect(parseNote("action: enter user data: user=standard_user assert: login ok")).toEqual([

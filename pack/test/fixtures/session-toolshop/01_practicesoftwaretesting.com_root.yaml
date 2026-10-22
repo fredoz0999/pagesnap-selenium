@@ -1,0 +1,401 @@
+# URL: https://practicesoftwaretesting.com/
+# Captured: 2026-10-22T02:21:55.657596794Z
+# Trigger: manual
+# Step: 1
+# Note: action: search for hammer
+# Session goal: Find a hammer and buy it as a logged-in customer
+
+- generic:
+  locators:
+    - {by: css, value: "[data-test=\"notification-bar\"]", stability: high, score: 98}
+  - link "Documentation":
+    locators:
+      - {by: linkText, value: "Documentation", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"https://testsmith-io.github.io/practice-software-testing/\"]", stability: medium, score: 65}
+- button "Testing Guide":
+  locators:
+    - {by: xpath, value: "//button[normalize-space()=\"Testing Guide\"] | //input[@type=\"button\" and @value=\"Testing Guide\"]", stability: medium, score: 40}
+- button "🐛 Bug Hunting":
+  locators:
+    - {by: xpath, value: "//button[normalize-space()=\"🐛 Bug Hunting\"] | //input[@type=\"button\" and @value=\"🐛 Bug Hunting\"]", stability: medium, score: 40}
+- navigation
+  - link "Practice Software Testing - Toolshop":
+    locators:
+      - {by: css, value: "html:nth-child(1) > body:nth-child(2) > app-root:nth-child(1) > app-header:nth-child(2) > nav:nth-child(2) > div:nth-child(1) > a:nth-child(1)", stability: low, score: 45}
+  - button "Toggle navigation" [collapsed]:
+    dropdown: closed
+    locators:
+      - {by: css, value: "[aria-label=\"Toggle navigation\"]", stability: medium, score: 65}
+- heading "Practice Software Testing - Toolshop" [level=1]
+- img "Banner"
+- generic:
+  locators:
+    - {by: css, value: "[data-test=\"course-promo\"]", stability: high, score: 98}
+  - link "Explore courses":
+    locators:
+      - {by: css, value: "[data-test=\"course-promo-link\"]", stability: high, score: 98}
+- generic:
+  locators:
+    - {by: id, value: "filters", stability: high, score: 92}
+  - heading "Sort" [level=4]
+  - form:
+    locators:
+      - {by: css, value: "#filters > form:nth-child(3)", stability: low, score: 45}
+    - combobox "sort":
+      value: ""
+      locators:
+        - {by: css, value: "[data-test=\"sort\"]", stability: high, score: 98}
+      options:  # native <select> - available without opening UI
+        - option "" [selected]
+        - option "Name (A - Z)"
+        - option "Name (Z - A)"
+        - option "Price (High - Low)"
+        - option "Price (Low - High)"
+        - option "CO₂ Rating (A - E)"
+        - option "CO₂ Rating (E - A)"
+  - heading "Price Range" [level=4]
+  - slider "ngx-slider":
+    locators:
+      - {by: css, value: "#filters > div:nth-child(6) > ngx-slider:nth-child(1) > span:nth-child(5)", stability: low, score: 45}
+  - slider "ngx-slider-max":
+    locators:
+      - {by: css, value: "[aria-label=\"ngx-slider-max\"]", stability: medium, score: 65}
+  - heading "Search" [level=4]
+  - form:
+    locators:
+      - {by: css, value: "#filters > form:nth-child(9)", stability: low, score: 45}
+    - textbox "Search":
+      value: ""
+      locators:
+        - {by: css, value: "[data-test=\"search-query\"]", stability: high, score: 98}
+        - {by: id, value: "search-query", stability: high, score: 92}
+    - button "X":
+      locators:
+        - {by: css, value: "[data-test=\"search-reset\"]", stability: high, score: 98}
+    - button "Search":
+      locators:
+        - {by: css, value: "[data-test=\"search-submit\"]", stability: high, score: 98}
+  - heading "Filters" [level=4]
+  - heading "By category:" [level=4]
+  - checkbox "Hand Tools":
+    value: "01M5GND71MK3KFRVGTBV1QE4ZQ"
+    locators:
+      - {by: css, value: "[data-test=\"category-01M5GND71MK3KFRVGTBV1QE4ZQ\"]", stability: high, score: 98}
+  - list
+    - checkbox "Hammer":
+      value: "01M5GND72GRNKJ0VS990Z1N3CF"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CF\"]", stability: high, score: 98}
+    - checkbox "Hand Saw":
+      value: "01M5GND72GRNKJ0VS990Z1N3CG"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CG\"]", stability: high, score: 98}
+    - checkbox "Wrench":
+      value: "01M5GND72GRNKJ0VS990Z1N3CH"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CH\"]", stability: high, score: 98}
+    - checkbox "Screwdriver":
+      value: "01M5GND72GRNKJ0VS990Z1N3CJ"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CJ\"]", stability: high, score: 98}
+    - checkbox "Pliers":
+      value: "01M5GND72GRNKJ0VS990Z1N3CK"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CK\"]", stability: high, score: 98}
+    - checkbox "Chisels":
+      value: "01M5GND72GRNKJ0VS990Z1N3CM"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CM\"]", stability: high, score: 98}
+    - checkbox "Measures":
+      value: "01M5GND72GRNKJ0VS990Z1N3CN"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CN\"]", stability: high, score: 98}
+  - checkbox "Power Tools":
+    value: "01M5GND71MK3KFRVGTBV1QE4ZR"
+    locators:
+      - {by: css, value: "[data-test=\"category-01M5GND71MK3KFRVGTBV1QE4ZR\"]", stability: high, score: 98}
+  - list
+    - checkbox "Grinder":
+      value: "01M5GND72GRNKJ0VS990Z1N3CP"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CP\"]", stability: high, score: 98}
+    - checkbox "Sander":
+      value: "01M5GND72GRNKJ0VS990Z1N3CQ"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CQ\"]", stability: high, score: 98}
+    - checkbox "Saw":
+      value: "01M5GND72GRNKJ0VS990Z1N3CR"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CR\"]", stability: high, score: 98}
+    - checkbox "Drill":
+      value: "01M5GND72GRNKJ0VS990Z1N3CS"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CS\"]", stability: high, score: 98}
+  - checkbox "Other":
+    value: "01M5GND71MK3KFRVGTBV1QE4ZS"
+    locators:
+      - {by: css, value: "[data-test=\"category-01M5GND71MK3KFRVGTBV1QE4ZS\"]", stability: high, score: 98}
+  - list
+    - checkbox "Tool Belts":
+      value: "01M5GND72GRNKJ0VS990Z1N3CT"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CT\"]", stability: high, score: 98}
+    - checkbox "Storage Solutions":
+      value: "01M5GND72GRNKJ0VS990Z1N3CV"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CV\"]", stability: high, score: 98}
+    - checkbox "Workbench":
+      value: "01M5GND72GRNKJ0VS990Z1N3CW"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CW\"]", stability: high, score: 98}
+    - checkbox "Safety Gear":
+      value: "01M5GND72GRNKJ0VS990Z1N3CX"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CX\"]", stability: high, score: 98}
+    - checkbox "Fasteners":
+      value: "01M5GND72GRNKJ0VS990Z1N3CY"
+      locators:
+        - {by: css, value: "[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CY\"]", stability: high, score: 98}
+  - heading "By brand:" [level=4]
+  - checkbox "ForgeFlex Tools":
+    value: "01M5GND6PZKTEJF24A041V4AWN"
+    locators:
+      - {by: css, value: "[data-test=\"brand-01M5GND6PZKTEJF24A041V4AWN\"]", stability: high, score: 98}
+  - checkbox "MightyCraft Hardware":
+    value: "01M5GND6PZKTEJF24A041V4AWP"
+    locators:
+      - {by: css, value: "[data-test=\"brand-01M5GND6PZKTEJF24A041V4AWP\"]", stability: high, score: 98}
+  - heading "Sustainability:" [level=4]
+  - checkbox "Show only eco-friendly products":
+    value: "on"
+    locators:
+      - {by: css, value: "[data-test=\"eco-friendly-filter\"]", stability: high, score: 98}
+      - {by: name, value: "eco_friendly", stability: high, score: 88}
+- link "Combination Pliers A B C D E $14.15":
+  locators:
+    - {by: css, value: "[data-test=\"product-01M5GND75DE8R8JBHYD9G7GTRH\"]", stability: high, score: 98}
+  - img "Combination Pliers"
+  - button "Compare" [dup 1/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(1) > div:nth-child(1) > button:nth-child(2)", stability: low, score: 45}
+  - heading "Combination Pliers" [level=5]
+  - generic "A = most environmentally friendly, E = higher environmental impact" [dup 1/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(1) > div:nth-child(2) > div:nth-child(2)", stability: low, score: 45}
+  - generic:
+    locators:
+      - {by: css, value: "app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(1) > div:nth-child(3) > span:nth-child(1) > span:nth-child(1)", stability: low, score: 45}
+- link "Pliers A B C D E $12.01":
+  locators:
+    - {by: css, value: "[data-test=\"product-01M5GND75HPV0PQ72MQXKN112F\"]", stability: high, score: 98}
+  - img "Pliers"
+  - button "Compare" [dup 2/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(2) > div:nth-child(1) > button:nth-child(2)", stability: low, score: 45}
+  - heading "Pliers" [level=5]
+  - generic "A = most environmentally friendly, E = higher environmental impact" [dup 2/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(2) > div:nth-child(2) > div:nth-child(2)", stability: low, score: 45}
+  - generic:
+    locators:
+      - {by: css, value: "app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(2) > div:nth-child(3) > span:nth-child(1) > span:nth-child(1)", stability: low, score: 45}
+- link "Bolt Cutters A B C D E $48.41":
+  locators:
+    - {by: css, value: "[data-test=\"product-01M5GND75N0P5KPN5W7QFYXQJV\"]", stability: high, score: 98}
+  - img "Bolt Cutters"
+  - button "Compare" [dup 3/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(3) > div:nth-child(1) > button:nth-child(2)", stability: low, score: 45}
+  - heading "Bolt Cutters" [level=5]
+  - generic "A = most environmentally friendly, E = higher environmental impact" [dup 3/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(3) > div:nth-child(2) > div:nth-child(2)", stability: low, score: 45}
+  - generic:
+    locators:
+      - {by: css, value: "app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(3) > div:nth-child(3) > span:nth-child(1) > span:nth-child(1)", stability: low, score: 45}
+- link "Long Nose Pliers A B C D E Out of stock $14.24":
+  locators:
+    - {by: css, value: "[data-test=\"product-01M5GND761K2NTWCZDBNNVZF7Z\"]", stability: high, score: 98}
+  - img "Long Nose Pliers"
+  - button "Compare" [dup 4/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(4) > div:nth-child(1) > button:nth-child(2)", stability: low, score: 45}
+  - heading "Long Nose Pliers" [level=5]
+  - generic "A = most environmentally friendly, E = higher environmental impact" [dup 4/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(4) > div:nth-child(2) > div:nth-child(2)", stability: low, score: 45}
+  - generic:
+    locators:
+      - {by: css, value: "[data-test=\"out-of-stock\"]", stability: high, score: 98}
+  - generic:
+    locators:
+      - {by: css, value: "app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(4) > div:nth-child(3) > span:nth-child(2) > span:nth-child(1)", stability: low, score: 45}
+- link "Slip Joint Pliers A B C D E $9.17":
+  locators:
+    - {by: css, value: "[data-test=\"product-01M5GND7662H72M48DH88MBZ04\"]", stability: high, score: 98}
+  - img "Slip Joint Pliers"
+  - button "Compare" [dup 5/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(5) > div:nth-child(1) > button:nth-child(2)", stability: low, score: 45}
+  - heading "Slip Joint Pliers" [level=5]
+  - generic "A = most environmentally friendly, E = higher environmental impact" [dup 5/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(5) > div:nth-child(2) > div:nth-child(2)", stability: low, score: 45}
+  - generic:
+    locators:
+      - {by: css, value: "app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(5) > div:nth-child(3) > span:nth-child(1) > span:nth-child(1)", stability: low, score: 45}
+- link "Claw Hammer with Shock Reduction Grip A B C D E $13.41":
+  locators:
+    - {by: css, value: "[data-test=\"product-01M5GND76DX63X0V1S632TWZFC\"]", stability: high, score: 98}
+  - img "Claw Hammer with Shock Reduction Grip"
+  - button "Compare" [dup 6/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(6) > div:nth-child(1) > button:nth-child(2)", stability: low, score: 45}
+  - heading "Claw Hammer with Shock Reduction Grip" [level=5]
+  - generic "A = most environmentally friendly, E = higher environmental impact" [dup 6/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(6) > div:nth-child(2) > div:nth-child(2)", stability: low, score: 45}
+  - generic:
+    locators:
+      - {by: css, value: "app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(6) > div:nth-child(3) > span:nth-child(1) > span:nth-child(1)", stability: low, score: 45}
+- link "Hammer A B C D E $12.58":
+  locators:
+    - {by: css, value: "[data-test=\"product-01M5GND76N9P1WQ5T8HJVJ5N3F\"]", stability: high, score: 98}
+  - img "Hammer"
+  - button "Compare" [dup 7/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(7) > div:nth-child(1) > button:nth-child(2)", stability: low, score: 45}
+  - heading "Hammer" [level=5]
+  - generic "A = most environmentally friendly, E = higher environmental impact" [dup 7/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(7) > div:nth-child(2) > div:nth-child(2)", stability: low, score: 45}
+  - generic:
+    locators:
+      - {by: css, value: "app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(7) > div:nth-child(3) > span:nth-child(1) > span:nth-child(1)", stability: low, score: 45}
+- link "Claw Hammer A B C D E $11.48":
+  locators:
+    - {by: css, value: "[data-test=\"product-01M5GND76XN01H7QVXZRB78RDZ\"]", stability: high, score: 98}
+  - img "Claw Hammer"
+  - button "Compare" [dup 8/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(8) > div:nth-child(1) > button:nth-child(2)", stability: low, score: 45}
+  - heading "Claw Hammer" [level=5]
+  - generic "A = most environmentally friendly, E = higher environmental impact" [dup 8/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(8) > div:nth-child(2) > div:nth-child(2)", stability: low, score: 45}
+  - generic:
+    locators:
+      - {by: css, value: "app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(8) > div:nth-child(3) > span:nth-child(1) > span:nth-child(1)", stability: low, score: 45}
+- link "Thor Hammer A B C D E $11.14":
+  locators:
+    - {by: css, value: "[data-test=\"product-01M5GND773BS12QCXFZNCMJA07\"]", stability: high, score: 98}
+  - img "Thor Hammer"
+  - button "Compare" [dup 9/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(9) > div:nth-child(1) > button:nth-child(2)", stability: low, score: 45}
+  - heading "Thor Hammer" [level=5]
+  - generic "A = most environmentally friendly, E = higher environmental impact" [dup 9/9]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(9) > div:nth-child(2) > div:nth-child(2)", stability: low, score: 45}
+  - generic:
+    locators:
+      - {by: css, value: "app-overview:nth-child(2) > div:nth-child(3) > div:nth-child(3) > div:nth-child(1) > a:nth-child(9) > div:nth-child(3) > span:nth-child(1) > span:nth-child(1)", stability: low, score: 45}
+- navigation
+  - list
+    - listitem
+      - button "Previous":
+        locators:
+          - {by: css, value: "[data-test=\"pagination-prev\"]", stability: high, score: 98}
+    - listitem
+      - button "Page-1":
+        locators:
+          - {by: css, value: "[aria-label=\"Page-1\"]", stability: medium, score: 65}
+    - listitem
+      - button "Page-2":
+        locators:
+          - {by: css, value: "[aria-label=\"Page-2\"]", stability: medium, score: 65}
+    - listitem
+      - button "Page-3":
+        locators:
+          - {by: css, value: "[aria-label=\"Page-3\"]", stability: medium, score: 65}
+    - listitem
+      - button "Page-4":
+        locators:
+          - {by: css, value: "[aria-label=\"Page-4\"]", stability: medium, score: 65}
+    - listitem
+      - button "Page-5":
+        locators:
+          - {by: css, value: "[aria-label=\"Page-5\"]", stability: medium, score: 65}
+    - listitem
+      - button "Next":
+        locators:
+          - {by: css, value: "[data-test=\"pagination-next\"]", stability: high, score: 98}
+- contentinfo
+  - generic:
+    locators:
+      - {by: css, value: "[data-test=\"footer-explore\"]", stability: high, score: 98}
+    - link "Learn Test Automation Hands-on courses for Playwright, Robot Framework, APIs and more":
+      locators:
+        - {by: css, value: "[data-test=\"footer-learn-courses\"]", stability: high, score: 98}
+    - link "API Spector Open-source API testing, mocking and contract testing":
+      locators:
+        - {by: css, value: "[data-test=\"footer-learn-spector\"]", stability: high, score: 98}
+    - link "GitHub Source code, issues and contributions":
+      locators:
+        - {by: css, value: "[data-test=\"footer-learn-github\"]", stability: high, score: 98}
+  - link "Privacy Policy":
+    locators:
+      - {by: linkText, value: "Privacy Policy", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"/privacy\"]", stability: medium, score: 65}
+  - link "Barn Images":
+    locators:
+      - {by: linkText, value: "Barn Images", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"https://unsplash.com/@barnimages\"]", stability: medium, score: 65}
+  - link "Unsplash":
+    locators:
+      - {by: linkText, value: "Unsplash", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"https://unsplash.com/photos/t5YUoHW6zRo\"]", stability: medium, score: 65}
+- button "Open chat":
+  locators:
+    - {by: css, value: "[data-test=\"chat-toggle\"]", stability: high, score: 98}
+- button "Show live shop activity":
+  locators:
+    - {by: css, value: "[data-test=\"live-activity-toggle\"]", stability: high, score: 98}
+- iframe "frame-0":
+
+# --- All <select> options ---
+# <select> "sort":
+#   -  (selected)
+#   - Name (A - Z)
+#   - Name (Z - A)
+#   - Price (High - Low)
+#   - Price (Low - High)
+#   - CO₂ Rating (A - E)
+#   - CO₂ Rating (E - A)
+
+# --- Selenium hints (best-effort; prefer high-stability locators) ---
+# generic: driver.findElement(By.cssSelector("[data-test=\"notification-bar\"]"))
+# Documentation: driver.findElement(By.linkText("Documentation"))
+# Testing Guide: driver.findElement(By.xpath("//button[normalize-space()=\"Testing Guide\"] | //input[@type=\"button\" and @value=\"Testing Guide\"]"))
+# 🐛 Bug Hunting: driver.findElement(By.xpath("//button[normalize-space()=\"🐛 Bug Hunting\"] | //input[@type=\"button\" and @value=\"🐛 Bug Hunting\"]"))
+# Practice Software Testing - Toolshop: driver.findElement(By.cssSelector("html:nth-child(1) > body:nth-child(2) > app-root:nth-child(1) > app-header:nth-child(2) > nav:nth-child(2) > div:nth-child(1) > a:nth-child(1)"))
+# Toggle navigation: driver.findElement(By.cssSelector("[aria-label=\"Toggle navigation\"]"))
+# generic: driver.findElement(By.cssSelector("[data-test=\"course-promo\"]"))
+# Explore courses: driver.findElement(By.cssSelector("[data-test=\"course-promo-link\"]"))
+# generic: driver.findElement(By.id("filters"))
+# form: driver.findElement(By.cssSelector("#filters > form:nth-child(3)"))
+# sort: driver.findElement(By.cssSelector("[data-test=\"sort\"]"))
+# ngx-slider: driver.findElement(By.cssSelector("#filters > div:nth-child(6) > ngx-slider:nth-child(1) > span:nth-child(5)"))
+# ngx-slider-max: driver.findElement(By.cssSelector("[aria-label=\"ngx-slider-max\"]"))
+# form: driver.findElement(By.cssSelector("#filters > form:nth-child(9)"))
+# Search: driver.findElement(By.cssSelector("[data-test=\"search-query\"]"))
+# X: driver.findElement(By.cssSelector("[data-test=\"search-reset\"]"))
+# Search: driver.findElement(By.cssSelector("[data-test=\"search-submit\"]"))
+# Hand Tools: driver.findElement(By.cssSelector("[data-test=\"category-01M5GND71MK3KFRVGTBV1QE4ZQ\"]"))
+# Hammer: driver.findElement(By.cssSelector("[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CF\"]"))
+# Hand Saw: driver.findElement(By.cssSelector("[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CG\"]"))
+# Wrench: driver.findElement(By.cssSelector("[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CH\"]"))
+# Screwdriver: driver.findElement(By.cssSelector("[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CJ\"]"))
+# Pliers: driver.findElement(By.cssSelector("[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CK\"]"))
+# Chisels: driver.findElement(By.cssSelector("[data-test=\"category-01M5GND72GRNKJ0VS990Z1N3CM\"]"))
+# … 68 more hints truncated
