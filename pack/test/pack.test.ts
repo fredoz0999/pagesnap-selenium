@@ -39,3 +39,31 @@ describe("pack on a Selenium-format session", () => {
     expect(r.text).toContain("By.cssSelector");
   });
 });
+
+describe("java page objects and validation", () => {
+  it("generates page objects with By constants from the best-scored locator", async () => {
+    const { buildPom, renderPom } = await import("../src/pom.js");
+    const files = renderPom(buildPom(FIXTURE), FIXTURE);
+    expect([...files.keys()]).toEqual(expect.arrayContaining(["BasePage.java", "InventoryPage.java", "CartPage.java", "PAGES.md"]));
+    const inv = files.get("InventoryPage.java")!;
+    expect(inv).toContain("public class InventoryPage extends BasePage");
+    expect(inv).toContain('public static final By ADD_TO_CART_FLEECE_JACKET_BUTTON = By.cssSelector("[data-test=\\"add-to-cart-fleece-jacket\\"]");');
+    expect(inv).toContain("public WebElement addToCartFleeceJacketButton()");
+    expect(files.get("BasePage.java")).toContain("shoppingCartLink()");
+  });
+
+  it("validate flags an invented id as MISS and passes captured locators", async () => {
+    const { validateJava } = await import("../src/validate.js");
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ps-val-"));
+    const f = path.join(dir, "T.java");
+    fs.writeFileSync(f, [
+      'driver.findElement(By.id("user-name"));',
+      'driver.findElement(By.cssSelector("[data-test=\\"checkout\\"]"));',
+      'driver.findElement(By.id("nope-field"));',
+      'driver.findElement(By.id(dyn));',
+      '// By.id("commented-out")',
+    ].join("\n"));
+    const rep = validateJava(FIXTURE, f);
+    expect(rep.counts).toEqual({ ok: 2, missing: 1, ambiguous: 0, unverified: 1 });
+  });
+});

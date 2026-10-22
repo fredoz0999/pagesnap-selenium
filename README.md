@@ -187,6 +187,8 @@ npm run pack -- build latest                    # lean/ : compact snapshots, reg
 npm run pack -- query latest "add the Fleece Jacket to the cart" --step=2 --diff
 npm run pack -- stats latest
 npm run pack -- bench latest [--md]             # tokens per approach for the whole flow
+npm run pack -- pom latest --out=../src/test/java/pages [--package=pages]   # Java page objects, no LLM
+npm run pack -- validate latest ../src/test/java      # check every By.* against the snapshots, exit 1 on MISS
 npm run pack -- install-prompts ../my-selenium-tests   # /pagesnap-automate and /pagesnap-testcases
 npm run mcp                                     # same query tools as an MCP server (stdio)
 ```
@@ -196,4 +198,12 @@ vector cosine (dependency-free hashing embedder; `--embedder=minilm` after `npm 
 an exact accessible-name bonus. A weak match falls back to the whole compact page. Locators come back as
 `=> css=[data-test="x"]`, `#id`, `[name=V]`, `linkText=`, `xpath=` and map directly to `By.*`.
 
-Not ported (Playwright-specific): `pom` (TS page objects), `validate`/`heal` (parse TS specs), `verify` (live drift check).
+**pom** writes `BasePage.java` (controls on half or more of the pages) plus one class per URL path. Every member is a
+`public static final By FOO_BUTTON` and a `fooButton()` returning the `WebElement`, built from the best-scored verified
+locator; fragile ones (xpath, `nth-child`, score <= 45) are marked. `PAGES.md` is the small member map an agent reads.
+
+**validate** scans `.java` files for `By.id/name/cssSelector/linkText/partialLinkText/xpath/className` string literals.
+`MISS` = an id or link text that was never captured (invented), `AMBG` = matches several elements, `????` = cannot be
+checked (variable argument, xpath, a name the capture dropped because two stronger locators won).
+
+Not ported: `heal` (rewrites TS specs) and `verify` (live drift check).

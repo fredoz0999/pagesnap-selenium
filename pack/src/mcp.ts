@@ -16,6 +16,8 @@ import fs from "node:fs";
 import path from "node:path";
 import readline from "node:readline";
 import { buildIndex, LEAN_DIR, queryIndex } from "./index.js";
+import { validateJava } from "./validate.js";
+import { writePom } from "./pom.js";
 import { ensureIndex, resolveSession, userPath } from "./paths.js";
 
 export const PROTOCOL_VERSION = "2025-06-18";
@@ -71,6 +73,26 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: "pagesnap_pom",
+    description: "Generate Selenium Java page objects from the verified locators (no LLM). Returns PAGES.md, the member map to use in tests.",
+    inputSchema: { type: "object", properties: { session, out: { type: "string", description: "Output folder (default src/test/java/pages)" }, package: { type: "string", description: "Java package (default pages)" } }, required: ["session"] },
+    async run(a) {
+      const dir = resolveSession(need(a, "session"));
+      const out = userPath(str(a, "out") || "src/test/java/pages");
+      writePom(dir, out, str(a, "package") ?? "pages");
+      return { text: "Wrote page objects to " + out + "\n\n" + fs.readFileSync(path.join(out, "PAGES.md"), "utf8") };
+    },
+  },
+  {
+    name: "pagesnap_validate",
+    description: "Check every By.* locator in a Java test or folder against the snapshots without running it. MISS = not captured (invented), AMBG = matches several elements.",
+    inputSchema: { type: "object", properties: { session, target: { type: "string", description: ".java file or folder" } }, required: ["session", "target"] },
+    async run(a) {
+      const rep = validateJava(resolveSession(need(a, "session")), userPath(need(a, "target")));
+      return { text: rep.text, isError: rep.counts.missing > 0 };
+    },
+  },
+  {
     name: "pagesnap_build",
     description: "Rebuild the lean pack (compact snapshots, index, prompts) after new captures. Query/overview do this automatically when stale.",
     inputSchema: { type: "object", properties: { session }, required: ["session"] },
@@ -92,7 +114,7 @@ export async function handle(req: Req): Promise<object | null> {
         protocolVersion: typeof req.params?.protocolVersion === "string" ? req.params.protocolVersion : PROTOCOL_VERSION,
         capabilities: { tools: {} },
         serverInfo: { name: "pagesnap", version: "1.1.0" },
-        instructions: "PageSnap lean pack. Call pagesnap_overview first, then pagesnap_query per test step (Selenium Java: map each `=>` locator to a By.*). Never read every NN_*.yaml.",
+        instructions: "PageSnap lean pack. Call pagesnap_overview first, then pagesnap_pom for page objects, pagesnap_query per test step, and pagesnap_validate before running the test. Never read every NN_*.yaml.",
       });
     case "ping":
       return reply({});

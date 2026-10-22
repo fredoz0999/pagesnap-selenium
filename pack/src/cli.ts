@@ -10,6 +10,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { buildIndex, loadIndex, queryIndex, LEAN_DIR } from "./index.js";
 import { ensureIndex, resolveSession, userPath } from "./paths.js";
+import { validateJava } from "./validate.js";
+import { writePom } from "./pom.js";
 import { bench, benchTmpCopy } from "./bench.js";
 import { automatePrompt, installPrompts, sessionGoal, slugify, testCasesPrompt, writeSessionPrompts } from "./prompts.js";
 
@@ -19,12 +21,16 @@ const USAGE = `pagesnap lean pack - token-lean snapshots for coding agents
   npm run pack -- query    <session|latest> "<step text>" [--k=4] [--step=N] [--diff] [--url=part] [--no-legend] [--json]
   npm run pack -- stats    <session|latest>
   npm run pack -- bench    <session|latest> [--md]
+  npm run pack -- validate <session|latest> <File.java|folder>
+  npm run pack -- pom      <session|latest> [--out=src/test/java/pages] [--package=pages]
   npm run pack -- prompt   <session|latest> [--cases] [--name=checkout-flow]
   npm run pack -- install-prompts <test-repo-dir>
 
 build     compact every NN_*.yaml into lean/NN_*.txt, chunk by UI region, write lean/index.json + lean/PACK.md
 query     hybrid search (keyword + vector + exact name) -> page outline + the few chunks that matter
 stats     raw vs compact token estimate per page
+validate  check every By.* locator in your Java tests/page objects against the snapshots (no LLM tokens). Exit 1 if any is missing.
+pom       generate Selenium Java page objects (BasePage + one class per URL path) from the verified locators (no LLM) + PAGES.md map
 bench     tokens an agent reads for the whole flow: raw / compact / query / query+diff / PAGES.md / ariaSnapshot
 prompt    print a ready-to-paste agent prompt for this session (--cases: manual test cases)
 install-prompts  add /pagesnap-automate and /pagesnap-testcases to a test repo
@@ -58,6 +64,20 @@ async function main(argv: string[]): Promise<number> {
       const rep = await bench(benchTmpCopy(dir), path.basename(dir));
       process.stdout.write(rest.includes("--md") ? rep.markdown : rep.text);
       return 0;
+    }
+    case "pom": {
+      const out = userPath(flag(rest, "out") || "src/test/java/pages");
+      const r = writePom(dir, out, flag(rest, "package") ?? "pages");
+      const members = r.base.length + r.pages.reduce((a, p) => a + p.members.length, 0);
+      console.log("Wrote " + r.files.length + " files to " + out + ": " + r.pages.length + " page classes + BasePage, " + members + " members");
+      return 0;
+    }
+    case "validate": {
+      const target = pos[0];
+      if (!target) { console.error("validate needs a .java file or folder"); return 1; }
+      const rep = validateJava(dir, userPath(target));
+      process.stdout.write(rep.text);
+      return rep.counts.missing > 0 ? 1 : 0;
     }
     case "prompt": {
       const name = flag(rest, "name");

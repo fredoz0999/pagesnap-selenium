@@ -15,6 +15,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { estimateTokens, parseSnapshot } from "./parse.js";
+import { renderPom, buildPom } from "./pom.js";
 import { buildIndex, LEAN_DIR, queryIndex, snapshotFiles } from "./index.js";
 
 export interface BenchRow {
@@ -45,12 +46,15 @@ export async function bench(sessionDir: string, label = path.basename(sessionDir
     q.push((await queryIndex(sessionDir, text, { step: s.step, legend: s === snaps[0] })).tokens);
     qd.push((await queryIndex(sessionDir, text, { step: s.step, diff: true, legend: s === snaps[0] })).tokens);
   }
+  const pomMd = renderPom(buildPom(sessionDir), sessionDir).get("PAGES.md") || "";
+  const pomTokens = estimateTokens(pomMd);
   const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
   const rows: BenchRow[] = [
     { approach: "raw YAML (all steps)", tokens: sum(raw), perStep: raw },
     { approach: "compact lean (all steps)", tokens: sum(compact), perStep: compact },
     { approach: "query per step", tokens: sum(q), perStep: q },
     { approach: "query --diff per step", tokens: sum(qd), perStep: qd },
+    { approach: "PAGES.md + query --diff", tokens: pomTokens + sum(qd), perStep: qd, note: "PAGES.md " + pomTokens + " once" },
   ];
   const aria = files.map((f) => path.join(sessionDir, f.replace(/\.ya?ml$/i, ".aria.txt")));
   if (aria.every((p) => fs.existsSync(p))) {
