@@ -1,0 +1,140 @@
+# URL: https://parabank.parasoft.com/parabank/about.htm;jsessionid=891BEFA5722D6209940DAC772912EF9A
+# Captured: 2026-10-22T02:13:03.823699054Z
+# Trigger: manual
+# Step: 2
+# Note: assert: the page shows the About ParaBank heading
+# Session goal: Open ParaBank and read the About page
+
+- img
+- img "ParaBank"
+- list
+  - listitem
+  - listitem
+    - link "About Us" [dup 1/2]:
+      locators:
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Services" [dup 1/2]:
+      locators:
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(3) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Products" [dup 1/2]:
+      locators:
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(4) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Locations" [dup 1/2]:
+      locators:
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(5) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Admin Page":
+      locators:
+        - {by: linkText, value: "Admin Page", stability: medium, score: 75}
+        - {by: css, value: "#headerPanel > ul:nth-child(1) > li:nth-child(6) > a:nth-child(1)", stability: low, score: 45}
+- list
+  - listitem
+    - link "home":
+      locators:
+        - {by: linkText, value: "home", stability: medium, score: 75}
+        - {by: css, value: "#headerPanel > ul:nth-child(2) > li:nth-child(1) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "about":
+      locators:
+        - {by: linkText, value: "about", stability: medium, score: 75}
+        - {by: css, value: "#headerPanel > ul:nth-child(2) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "contact":
+      locators:
+        - {by: linkText, value: "contact", stability: medium, score: 75}
+        - {by: css, value: "#headerPanel > ul:nth-child(2) > li:nth-child(3) > a:nth-child(1)", stability: low, score: 45}
+- heading "Customer Login" [level=2]
+- form:
+  locators:
+    - {by: name, value: "login", stability: high, score: 88}
+  - textbox "username":
+    value: ""
+    locators:
+      - {by: name, value: "username", stability: high, score: 88}
+  - textbox "password":
+    value: "***"
+    locators:
+      - {by: name, value: "password", stability: high, score: 88}
+  - button:
+    value: "Log In"
+    locators:
+      - {by: css, value: "input[type=\"submit\"][value=\"Log In\"]", stability: medium, score: 65}
+      - {by: xpath, value: "//button[normalize-space()=\"Log In\"] | //input[@type=\"submit\" and @value=\"Log In\"]", stability: medium, score: 40}
+- link "Forgot login info?":
+  locators:
+    - {by: linkText, value: "Forgot login info?", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"lookup.htm\"]", stability: medium, score: 65}
+- link "Register":
+  locators:
+    - {by: linkText, value: "Register", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"register.htm\"]", stability: medium, score: 65}
+- heading "ParaSoft Demo Website" [level=1]
+- link "www.parasoft.com" [dup 1/2]:
+  locators:
+    - {by: css, value: "#rightPanel > p:nth-child(4) > a:nth-child(2)", stability: low, score: 45}
+- list
+  - listitem
+    - link "Home":
+      locators:
+        - {by: linkText, value: "Home", stability: medium, score: 75}
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(1) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "About Us" [dup 2/2]:
+      locators:
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Services" [dup 2/2]:
+      locators:
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(3) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Products" [dup 2/2]:
+      locators:
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(4) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Locations" [dup 2/2]:
+      locators:
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(5) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - link "Site Map":
+      locators:
+        - {by: linkText, value: "Site Map", stability: medium, score: 75}
+        - {by: css, value: "a[href*=\"sitemap.htm\"]", stability: medium, score: 65}
+  - listitem
+    - link "Contact Us":
+      locators:
+        - {by: linkText, value: "Contact Us", stability: medium, score: 75}
+        - {by: css, value: "#footerPanel > ul:nth-child(1) > li:nth-child(7) > a:nth-child(1)", stability: low, score: 45}
+- list
+  - listitem
+  - listitem
+    - link "www.parasoft.com" [dup 2/2]:
+      locators:
+        - {by: css, value: "#footerPanel > ul:nth-child(3) > li:nth-child(2) > a:nth-child(1)", stability: low, score: 45}
+
+# --- Selenium hints (best-effort; prefer high-stability locators) ---
+# About Us (1/2): driver.findElement(By.cssSelector("#headerPanel > ul:nth-child(1) > li:nth-child(2) > a:nth-child(1)"))
+# Services (1/2): driver.findElement(By.cssSelector("#headerPanel > ul:nth-child(1) > li:nth-child(3) > a:nth-child(1)"))
+# Products (1/2): driver.findElement(By.cssSelector("#headerPanel > ul:nth-child(1) > li:nth-child(4) > a:nth-child(1)"))
+# Locations (1/2): driver.findElement(By.cssSelector("#headerPanel > ul:nth-child(1) > li:nth-child(5) > a:nth-child(1)"))
+# Admin Page: driver.findElement(By.linkText("Admin Page"))
+# home: driver.findElement(By.linkText("home"))
+# about: driver.findElement(By.linkText("about"))
+# contact: driver.findElement(By.linkText("contact"))
+# form: driver.findElement(By.name("login"))
+# username: driver.findElement(By.name("username"))
+# password: driver.findElement(By.name("password"))
+# button: driver.findElement(By.cssSelector("input[type=\"submit\"][value=\"Log In\"]"))
+# Forgot login info?: driver.findElement(By.linkText("Forgot login info?"))
+# Register: driver.findElement(By.linkText("Register"))
+# www.parasoft.com (1/2): driver.findElement(By.cssSelector("#rightPanel > p:nth-child(4) > a:nth-child(2)"))
+# Home: driver.findElement(By.linkText("Home"))
+# About Us (2/2): driver.findElement(By.cssSelector("#footerPanel > ul:nth-child(1) > li:nth-child(2) > a:nth-child(1)"))
+# Services (2/2): driver.findElement(By.cssSelector("#footerPanel > ul:nth-child(1) > li:nth-child(3) > a:nth-child(1)"))
+# Products (2/2): driver.findElement(By.cssSelector("#footerPanel > ul:nth-child(1) > li:nth-child(4) > a:nth-child(1)"))
+# Locations (2/2): driver.findElement(By.cssSelector("#footerPanel > ul:nth-child(1) > li:nth-child(5) > a:nth-child(1)"))
+# Site Map: driver.findElement(By.linkText("Site Map"))
+# Contact Us: driver.findElement(By.linkText("Contact Us"))
+# www.parasoft.com (2/2): driver.findElement(By.cssSelector("#footerPanel > ul:nth-child(3) > li:nth-child(2) > a:nth-child(1)"))
