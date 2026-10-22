@@ -421,7 +421,15 @@ public class SnapshotCapture {
               if (loc.by === 'css') return loc.stability === 'low' ? 45 : loc.stability === 'medium' ? 65 : 85;
               return 40;
             };
-            const stampScore = (loc) => { loc.score = locatorScore(loc); return loc; };
+            // Generated ids (ULID, UUID, long hex, long digit runs) change when the app reseeds its data,
+            // so a data-test/id that embeds one is not a stable locator whatever its attribute says.
+            const GENERATED_VALUE = /[0-9A-HJKMNP-TV-Z]{26}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}|[0-9a-f]{16,}|\\d{6,}/;
+            const stampScore = (loc) => {
+              if (loc.by !== 'linkText' && GENERATED_VALUE.test(String(loc.value))) loc.stability = 'low';
+              loc.score = locatorScore(loc);
+              if (loc.stability === 'low' && loc.by !== 'xpath' && loc.matches == null) loc.score = Math.min(loc.score, 45);
+              return loc;
+            };
 
             const buildLocators = (el) => {
               const locators = [];

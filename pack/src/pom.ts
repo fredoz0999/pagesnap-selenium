@@ -121,7 +121,11 @@ function urlPathOf(url: string): string {
 }
 
 function classNameFor(urlPath: string): string {
-  const last = urlPath.split("/").filter(Boolean).pop() || "";
+  // Skip generated id segments (/product/01M5GND7...): name the page after the resource, not the record.
+  const ID_SEG = /^([0-9A-HJKMNP-TV-Z]{26}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F-]+|[0-9a-f]{16,}|\d+)$/;
+  const segs = urlPath.split("/").filter(Boolean);
+  while (segs.length > 1 && ID_SEG.test(segs[segs.length - 1])) segs.pop();
+  const last = ID_SEG.test(segs[segs.length - 1] || "") ? "" : segs[segs.length - 1] || "";
   const stem = last.replace(/\.(html?|htm|jsp|php|aspx?)$/i, "");
   const parts = words(stem);
   if (!parts.length || /^(index|home|default)$/i.test(stem)) return "HomePage";

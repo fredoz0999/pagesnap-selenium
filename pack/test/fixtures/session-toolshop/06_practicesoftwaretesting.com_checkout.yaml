@@ -1,0 +1,422 @@
+# URL: https://practicesoftwaretesting.com/checkout
+# Captured: 2026-10-22T02:23:21.244251905Z
+# Trigger: manual
+# Step: 6
+# Note: action: log in with the demo customer account
+# Session goal: Find a hammer and buy it as a logged-in customer
+
+- generic:
+  locators:
+    - {by: css, value: "[data-test=\"notification-bar\"]", stability: high, score: 98}
+  - link "Documentation":
+    locators:
+      - {by: linkText, value: "Documentation", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"https://testsmith-io.github.io/practice-software-testing/\"]", stability: medium, score: 65}
+- button "Testing Guide":
+  locators:
+    - {by: xpath, value: "//button[normalize-space()=\"Testing Guide\"] | //input[@type=\"button\" and @value=\"Testing Guide\"]", stability: medium, score: 40}
+- button "🐛 Bug Hunting":
+  locators:
+    - {by: xpath, value: "//button[normalize-space()=\"🐛 Bug Hunting\"] | //input[@type=\"button\" and @value=\"🐛 Bug Hunting\"]", stability: medium, score: 40}
+- navigation
+  - link "Practice Software Testing - Toolshop":
+    locators:
+      - {by: css, value: "html:nth-child(1) > body:nth-child(2) > app-root:nth-child(1) > app-header:nth-child(2) > nav:nth-child(2) > div:nth-child(1) > a:nth-child(1)", stability: low, score: 45}
+  - menubar "Main menu"
+    - menuitem "Home":
+      locators:
+        - {by: xpath, value: "//*[@role=\"menuitem\" or self::li][contains(normalize-space(.), \"Home\")]", stability: low, score: 40}
+      - link "Home" [current]:
+        locators:
+          - {by: css, value: "[data-test=\"nav-home\"]", stability: high, score: 98}
+    - menuitem "Categories":
+      locators:
+        - {by: xpath, value: "//*[@role=\"menuitem\" or self::li][contains(normalize-space(.), \"Categories\")]", stability: low, score: 40}
+      - button "Categories" [collapsed]:
+        dropdown: closed
+        locators:
+          - {by: css, value: "[data-test=\"nav-categories\"]", stability: high, score: 98}
+    - menuitem "Contact":
+      locators:
+        - {by: xpath, value: "//*[@role=\"menuitem\" or self::li][contains(normalize-space(.), \"Contact\")]", stability: low, score: 40}
+      - link "Contact":
+        locators:
+          - {by: css, value: "[data-test=\"nav-contact\"]", stability: high, score: 98}
+    - menuitem "Sign in":
+      locators:
+        - {by: css, value: "#navbarSupportedContent > ul:nth-child(1) > li:nth-child(4)", stability: low, score: 45}
+      - link "Sign in":
+        locators:
+          - {by: css, value: "[data-test=\"nav-sign-in\"]", stability: high, score: 98}
+    - menuitem "1":
+      locators:
+        - {by: css, value: "#navbarSupportedContent > ul:nth-child(1) > li:nth-child(5)", stability: low, score: 45}
+      - link "cart":
+        locators:
+          - {by: css, value: "[data-test=\"nav-cart\"]", stability: high, score: 98}
+        - generic:
+          locators:
+            - {by: css, value: "[data-test=\"cart-quantity\"]", stability: high, score: 98}
+            - {by: id, value: "lblCartCount", stability: high, score: 92}
+  - button "Select language" [collapsed]:
+    dropdown: closed
+    locators:
+      - {by: css, value: "[data-test=\"language-select\"]", stability: high, score: 98}
+      - {by: id, value: "language", stability: high, score: 92}
+- list
+  - listitem
+  - listitem
+  - listitem
+  - listitem
+- tablist
+  - listitem
+    - tab "Sign in":
+      locators:
+        - {by: css, value: "div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > ul:nth-child(1) > li:nth-child(1) > a:nth-child(1)", stability: low, score: 45}
+  - listitem
+    - tab "Continue as Guest":
+      locators:
+        - {by: linkText, value: "Continue as Guest", stability: medium, score: 75}
+- tabpanel
+  - heading "Login" [level=3]
+  - form:
+    locators:
+      - {by: css, value: "#signin-tab > form:nth-child(2)", stability: low, score: 45}
+    - textbox "Email address *" [required]:
+      value: ""
+      locators:
+        - {by: css, value: "[data-test=\"email\"]", stability: high, score: 98}
+        - {by: id, value: "email", stability: high, score: 92}
+    - textbox "Password *" [required]:
+      value: "***"
+      locators:
+        - {by: css, value: "[data-test=\"password\"]", stability: high, score: 98}
+        - {by: id, value: "password", stability: high, score: 92}
+    - button:
+      value: "Login"
+      locators:
+        - {by: css, value: "[data-test=\"login-submit\"]", stability: high, score: 98}
+    - link "Register your account":
+      locators:
+        - {by: css, value: "[data-test=\"register-link\"]", stability: high, score: 98}
+    - link "Forgot your Password?":
+      locators:
+        - {by: css, value: "[data-test=\"forgot-password-link\"]", stability: high, score: 98}
+- contentinfo
+  - generic:
+    locators:
+      - {by: css, value: "[data-test=\"footer-explore\"]", stability: high, score: 98}
+    - link "Learn Test Automation Hands-on courses for Playwright, Robot Framework, APIs and more":
+      locators:
+        - {by: css, value: "[data-test=\"footer-learn-courses\"]", stability: high, score: 98}
+    - link "API Spector Open-source API testing, mocking and contract testing":
+      locators:
+        - {by: css, value: "[data-test=\"footer-learn-spector\"]", stability: high, score: 98}
+    - link "GitHub Source code, issues and contributions":
+      locators:
+        - {by: css, value: "[data-test=\"footer-learn-github\"]", stability: high, score: 98}
+  - link "Privacy Policy":
+    locators:
+      - {by: linkText, value: "Privacy Policy", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"/privacy\"]", stability: medium, score: 65}
+  - link "Barn Images":
+    locators:
+      - {by: linkText, value: "Barn Images", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"https://unsplash.com/@barnimages\"]", stability: medium, score: 65}
+  - link "Unsplash":
+    locators:
+      - {by: linkText, value: "Unsplash", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"https://unsplash.com/photos/t5YUoHW6zRo\"]", stability: medium, score: 65}
+- button "Open chat":
+  locators:
+    - {by: css, value: "[data-test=\"chat-toggle\"]", stability: high, score: 98}
+- button "Show live shop activity":
+  locators:
+    - {by: css, value: "[data-test=\"live-activity-toggle\"]", stability: high, score: 98}
+- iframe "frame-0":
+
+# --- All <select> options ---
+# <select> "country":
+#   - Your country * (disabled, selected)
+#   - Albania
+#   - Åland Islands
+#   - Algeria
+#   - American Samoa
+#   - Andorra
+#   - Angola
+#   - Anguilla
+#   - Antarctica
+#   - Antigua and Barbuda
+#   - Argentina
+#   - Armenia
+#   - Aruba
+#   - Australia
+#   - Austria
+#   - Azerbaijan
+#   - Bahamas (the)
+#   - Bahrain
+#   - Bangladesh
+#   - Barbados
+#   - Belarus
+#   - Belgium
+#   - Belize
+#   - Benin
+#   - Bermuda
+#   - Bhutan
+#   - Bolivia (Plurinational State of)
+#   - Bonaire, Sint Eustatius and Saba
+#   - Bosnia and Herzegovina
+#   - Botswana
+#   - Bouvet Island
+#   - Brazil
+#   - British Indian Ocean Territory (the)
+#   - Brunei Darussalam
+#   - Bulgaria
+#   - Burkina Faso
+#   - Burundi
+#   - Cabo Verde
+#   - Cambodia
+#   - Cameroon
+#   - Canada
+#   - Cayman Islands (the)
+#   - Central African Republic (the)
+#   - Chad
+#   - Chile
+#   - China
+#   - Christmas Island
+#   - Cocos (Keeling) Islands (the)
+#   - Colombia
+#   - Comoros (the)
+#   - Congo (the Democratic Republic of the)
+#   - Congo (the)
+#   - Cook Islands (the)
+#   - Costa Rica
+#   - Croatia
+#   - Cuba
+#   - Curaçao
+#   - Cyprus
+#   - Czechia
+#   - Côte d'Ivoire
+#   - Denmark
+#   - Djibouti
+#   - Dominica
+#   - Dominican Republic (the)
+#   - Ecuador
+#   - Egypt
+#   - El Salvador
+#   - Equatorial Guinea
+#   - Eritrea
+#   - Estonia
+#   - Eswatini
+#   - Ethiopia
+#   - Falkland Islands (the) [Malvinas]
+#   - Faroe Islands (the)
+#   - Fiji
+#   - Finland
+#   - France
+#   - French Guiana
+#   - French Polynesia
+#   - French Southern Territories (the)
+#   - Gabon
+#   - Gambia (the)
+#   - Georgia
+#   - Germany
+#   - Ghana
+#   - Gibraltar
+#   - Greece
+#   - Greenland
+#   - Grenada
+#   - Guadeloupe
+#   - Guam
+#   - Guatemala
+#   - Guernsey
+#   - Guinea
+#   - Guinea-Bissau
+#   - Guyana
+#   - Haiti
+#   - Heard Island and McDonald Islands
+#   - Holy See (the)
+#   - Honduras
+#   - Hong Kong
+#   - Hungary
+#   - Iceland
+#   - India
+#   - Indonesia
+#   - Iran (Islamic Republic of)
+#   - Iraq
+#   - Ireland
+#   - Isle of Man
+#   - Israel
+#   - Italy
+#   - Jamaica
+#   - Japan
+#   - Jersey
+#   - Jordan
+#   - Kazakhstan
+#   - Kenya
+#   - Kiribati
+#   - Korea (the Democratic People's Republic of)
+#   - Korea (the Republic of)
+#   - Kuwait
+#   - Kyrgyzstan
+#   - Lao People's Democratic Republic (the)
+#   - Latvia
+#   - Lebanon
+#   - Lesotho
+#   - Liberia
+#   - Libya
+#   - Liechtenstein
+#   - Lithuania
+#   - Luxembourg
+#   - Macao
+#   - Madagascar
+#   - Malawi
+#   - Malaysia
+#   - Maldives
+#   - Mali
+#   - Malta
+#   - Marshall Islands (the)
+#   - Martinique
+#   - Mauritania
+#   - Mauritius
+#   - Mayotte
+#   - Mexico
+#   - Micronesia (Federated States of)
+#   - Moldova (the Republic of)
+#   - Monaco
+#   - Mongolia
+#   - Montenegro
+#   - Montserrat
+#   - Morocco
+#   - Mozambique
+#   - Myanmar
+#   - Namibia
+#   - Nauru
+#   - Nepal
+#   - Netherlands (the)
+#   - New Caledonia
+#   - New Zealand
+#   - Nicaragua
+#   - Niger (the)
+#   - Nigeria
+#   - Niue
+#   - Norfolk Island
+#   - Northern Mariana Islands (the)
+#   - Norway
+#   - Oman
+#   - Pakistan
+#   - Palau
+#   - Palestine, State of
+#   - Panama
+#   - Papua New Guinea
+#   - Paraguay
+#   - Peru
+#   - Philippines (the)
+#   - Pitcairn
+#   - Poland
+#   - Portugal
+#   - Puerto Rico
+#   - Qatar
+#   - Republic of North Macedonia
+#   - Romania
+#   - Russian Federation (the)
+#   - Rwanda
+#   - Réunion
+#   - Saint Barthélemy
+#   - Saint Helena, Ascension and Tristan da Cunha
+#   - Saint Kitts and Nevis
+#   - Saint Lucia
+#   - Saint Martin (French part)
+#   - Saint Pierre and Miquelon
+#   - Saint Vincent and the Grenadines
+#   - Samoa
+#   - San Marino
+#   - Sao Tome and Principe
+#   - Saudi Arabia
+#   - Senegal
+#   - Serbia
+#   - Seychelles
+#   - Sierra Leone
+#   - Singapore
+#   - Sint Maarten (Dutch part)
+#   - Slovakia
+#   - Slovenia
+#   - Solomon Islands
+#   - Somalia
+#   - South Africa
+#   - South Georgia and the South Sandwich Islands
+#   - South Sudan
+#   - Spain
+#   - Sri Lanka
+#   - Sudan (the)
+#   - Suriname
+#   - Svalbard and Jan Mayen
+#   - Sweden
+#   - Switzerland
+#   - Syrian Arab Republic
+#   - Taiwan (Province of China)
+#   - Tajikistan
+#   - Tanzania, United Republic of
+#   - Thailand
+#   - Timor-Leste
+#   - Togo
+#   - Tokelau
+#   - Tonga
+#   - Trinidad and Tobago
+#   - Tunisia
+#   - Turkey
+#   - Turkmenistan
+#   - Turks and Caicos Islands (the)
+#   - Tuvalu
+#   - Uganda
+#   - Ukraine
+#   - United Arab Emirates (the)
+#   - United Kingdom of Great Britain and Northern Ireland (the)
+#   - United States Minor Outlying Islands (the)
+#   - United States of America (the)
+#   - Uruguay
+#   - Uzbekistan
+#   - Vanuatu
+#   - Venezuela (Bolivarian Republic of)
+#   - Viet Nam
+#   - Virgin Islands (British)
+#   - Virgin Islands (U.S.)
+#   - Wallis and Futuna
+#   - Western Sahara
+#   - Yemen
+#   - Zambia
+#   - Zimbabwe
+# <select> "payment-method":
+#   - Choose your payment method (disabled, selected)
+#   - Bank Transfer
+#   - Cash on Delivery
+#   - Credit Card
+#   - Buy Now Pay Later
+#   - Gift Card
+
+# --- Selenium hints (best-effort; prefer high-stability locators) ---
+# generic: driver.findElement(By.cssSelector("[data-test=\"notification-bar\"]"))
+# Documentation: driver.findElement(By.linkText("Documentation"))
+# Testing Guide: driver.findElement(By.xpath("//button[normalize-space()=\"Testing Guide\"] | //input[@type=\"button\" and @value=\"Testing Guide\"]"))
+# 🐛 Bug Hunting: driver.findElement(By.xpath("//button[normalize-space()=\"🐛 Bug Hunting\"] | //input[@type=\"button\" and @value=\"🐛 Bug Hunting\"]"))
+# Practice Software Testing - Toolshop: driver.findElement(By.cssSelector("html:nth-child(1) > body:nth-child(2) > app-root:nth-child(1) > app-header:nth-child(2) > nav:nth-child(2) > div:nth-child(1) > a:nth-child(1)"))
+# Home: driver.findElement(By.xpath("//*[@role=\"menuitem\" or self::li][contains(normalize-space(.), \"Home\")]"))
+# Home: driver.findElement(By.cssSelector("[data-test=\"nav-home\"]"))
+# Categories: driver.findElement(By.xpath("//*[@role=\"menuitem\" or self::li][contains(normalize-space(.), \"Categories\")]"))
+# Categories: driver.findElement(By.cssSelector("[data-test=\"nav-categories\"]"))
+# Contact: driver.findElement(By.xpath("//*[@role=\"menuitem\" or self::li][contains(normalize-space(.), \"Contact\")]"))
+# Contact: driver.findElement(By.cssSelector("[data-test=\"nav-contact\"]"))
+# Sign in: driver.findElement(By.cssSelector("#navbarSupportedContent > ul:nth-child(1) > li:nth-child(4)"))
+# Sign in: driver.findElement(By.cssSelector("[data-test=\"nav-sign-in\"]"))
+# 1: driver.findElement(By.cssSelector("#navbarSupportedContent > ul:nth-child(1) > li:nth-child(5)"))
+# cart: driver.findElement(By.cssSelector("[data-test=\"nav-cart\"]"))
+# generic: driver.findElement(By.cssSelector("[data-test=\"cart-quantity\"]"))
+# Select language: driver.findElement(By.cssSelector("[data-test=\"language-select\"]"))
+# Sign in: driver.findElement(By.cssSelector("div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > ul:nth-child(1) > li:nth-child(1) > a:nth-child(1)"))
+# Continue as Guest: driver.findElement(By.linkText("Continue as Guest"))
+# form: driver.findElement(By.cssSelector("#signin-tab > form:nth-child(2)"))
+# Email address *: driver.findElement(By.cssSelector("[data-test=\"email\"]"))
+# Password *: driver.findElement(By.cssSelector("[data-test=\"password\"]"))
+# button: driver.findElement(By.cssSelector("[data-test=\"login-submit\"]"))
+# Register your account: driver.findElement(By.cssSelector("[data-test=\"register-link\"]"))
+# … 10 more hints truncated

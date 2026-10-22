@@ -1,0 +1,243 @@
+# URL: https://practicesoftwaretesting.com/product/01M5GND76DX63X0V1S632TWZFC
+# Captured: 2026-10-22T02:22:22.198808774Z
+# Trigger: manual
+# Step: 4
+# Note: action: add the product to the cart
+# Session goal: Find a hammer and buy it as a logged-in customer
+
+- generic:
+  locators:
+    - {by: css, value: "[data-test=\"notification-bar\"]", stability: high, score: 98}
+  - link "Documentation":
+    locators:
+      - {by: linkText, value: "Documentation", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"https://testsmith-io.github.io/practice-software-testing/\"]", stability: medium, score: 65}
+- button "Testing Guide":
+  locators:
+    - {by: xpath, value: "//button[normalize-space()=\"Testing Guide\"] | //input[@type=\"button\" and @value=\"Testing Guide\"]", stability: medium, score: 40}
+- button "🐛 Bug Hunting":
+  locators:
+    - {by: xpath, value: "//button[normalize-space()=\"🐛 Bug Hunting\"] | //input[@type=\"button\" and @value=\"🐛 Bug Hunting\"]", stability: medium, score: 40}
+- navigation
+  - link "Practice Software Testing - Toolshop":
+    locators:
+      - {by: css, value: "html:nth-child(1) > body:nth-child(2) > app-root:nth-child(1) > app-header:nth-child(2) > nav:nth-child(2) > div:nth-child(1) > a:nth-child(1)", stability: low, score: 45}
+  - button "Toggle navigation" [collapsed]:
+    dropdown: closed
+    locators:
+      - {by: css, value: "[aria-label=\"Toggle navigation\"]", stability: medium, score: 65}
+- img "Claw Hammer with Shock Reduction Grip"
+- link "iMattSmart":
+  locators:
+    - {by: linkText, value: "iMattSmart", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"https://unsplash.com/@imattsmart\"]", stability: medium, score: 65}
+- link "Unsplash" [dup 1/2]:
+  locators:
+    - {by: css, value: "a[href*=\"https://unsplash.com/photos/jaLaLQdkBOE\"]", stability: medium, score: 65}
+- heading "Claw Hammer with Shock Reduction Grip" [level=1]
+- generic "unit-price":
+  locators:
+    - {by: css, value: "[data-test=\"unit-price\"]", stability: high, score: 98}
+- generic "A = most environmentally friendly, E = higher environmental impact":
+  locators:
+    - {by: css, value: "[data-test=\"co2-rating-badge\"]", stability: high, score: 98}
+- generic:
+  locators:
+    - {by: css, value: "[data-test=\"product-description\"]", stability: high, score: 98}
+    - {by: id, value: "description", stability: high, score: 92}
+- button "Decrease quantity":
+  locators:
+    - {by: css, value: "[data-test=\"decrease-quantity\"]", stability: high, score: 98}
+    - {by: id, value: "btn-decrease-quantity", stability: high, score: 92}
+- spinbutton "Quantity":
+  value: "1"
+  locators:
+    - {by: css, value: "[data-test=\"quantity\"]", stability: high, score: 98}
+    - {by: id, value: "quantity-input", stability: high, score: 92}
+- button "Increase quantity":
+  locators:
+    - {by: css, value: "[data-test=\"increase-quantity\"]", stability: high, score: 98}
+    - {by: id, value: "btn-increase-quantity", stability: high, score: 92}
+- button "Add to cart":
+  locators:
+    - {by: css, value: "[data-test=\"add-to-cart\"]", stability: high, score: 98}
+    - {by: id, value: "btn-add-to-cart", stability: high, score: 92}
+- button "Add to favourites":
+  locators:
+    - {by: css, value: "[data-test=\"add-to-favorites\"]", stability: high, score: 98}
+    - {by: id, value: "btn-add-to-favorites", stability: high, score: 92}
+- button "Compare":
+  locators:
+    - {by: css, value: "[data-test=\"add-to-compare\"]", stability: high, score: 98}
+- heading "Specifications" [level=3]
+- table
+  - row
+    - cell
+    - cell
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)", stability: low, score: 45}
+  - row
+    - cell
+    - cell
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > span:nth-child(1)", stability: low, score: 45}
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > span:nth-child(2)", stability: low, score: 45}
+  - row
+    - cell
+    - cell
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > span:nth-child(1)", stability: low, score: 45}
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > span:nth-child(2)", stability: low, score: 45}
+  - row
+    - cell
+    - cell
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) > span:nth-child(1)", stability: low, score: 45}
+  - row
+    - cell
+    - cell
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(5) > td:nth-child(2) > span:nth-child(1)", stability: low, score: 45}
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(5) > td:nth-child(2) > span:nth-child(2)", stability: low, score: 45}
+  - row
+    - cell
+    - cell
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(6) > td:nth-child(2) > span:nth-child(1)", stability: low, score: 45}
+      - generic:
+        locators:
+          - {by: css, value: "app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(6) > td:nth-child(2) > span:nth-child(2)", stability: low, score: 45}
+- heading "Related products" [level=2]
+- link "Hammer More information":
+  locators:
+    - {by: linkText, value: "Hammer More information", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"/product/01M5GND76N9P1WQ5T8HJVJ5N3F\"]", stability: medium, score: 65}
+  - img "Hammer"
+  - heading "Hammer" [level=5]
+  - link "More information" [dup 1/6]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-detail:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > div:nth-child(2) > a:nth-child(2)", stability: low, score: 45}
+- link "Thor Hammer More information":
+  locators:
+    - {by: linkText, value: "Thor Hammer More information", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"/product/01M5GND773BS12QCXFZNCMJA07\"]", stability: medium, score: 65}
+  - img "Thor Hammer"
+  - heading "Thor Hammer" [level=5]
+  - link "More information" [dup 2/6]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-detail:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > a:nth-child(2) > div:nth-child(2) > a:nth-child(2)", stability: low, score: 45}
+- link "Sledgehammer More information":
+  locators:
+    - {by: linkText, value: "Sledgehammer More information", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"/product/01M5GND77768V5FAP7XFFEBM79\"]", stability: medium, score: 65}
+  - img "Sledgehammer"
+  - heading "Sledgehammer" [level=5]
+  - link "More information" [dup 3/6]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-detail:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > a:nth-child(3) > div:nth-child(2) > a:nth-child(2)", stability: low, score: 45}
+- link "Claw Hammer with Fiberglass Handle More information":
+  locators:
+    - {by: linkText, value: "Claw Hammer with Fiberglass Handle More information", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"/product/01M5GND77A1MZV5GJHM225X0Q5\"]", stability: medium, score: 65}
+  - img "Claw Hammer with Fiberglass Handle"
+  - heading "Claw Hammer with Fiberglass Handle" [level=5]
+  - link "More information" [dup 4/6]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-detail:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > a:nth-child(4) > div:nth-child(2) > a:nth-child(2)", stability: low, score: 45}
+- link "Court Hammer More information":
+  locators:
+    - {by: linkText, value: "Court Hammer More information", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"/product/01M5GND77C8TVM5Q0SM5PNNXTM\"]", stability: medium, score: 65}
+  - img "Court Hammer"
+  - heading "Court Hammer" [level=5]
+  - link "More information" [dup 5/6]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-detail:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > a:nth-child(5) > div:nth-child(2) > a:nth-child(2)", stability: low, score: 45}
+- link "Claw Hammer More information":
+  locators:
+    - {by: linkText, value: "Claw Hammer More information", stability: medium, score: 75}
+    - {by: css, value: "a[href*=\"/product/01M5GND76XN01H7QVXZRB78RDZ\"]", stability: medium, score: 65}
+  - img "Claw Hammer"
+  - heading "Claw Hammer" [level=5]
+  - link "More information" [dup 6/6]:
+    locators:
+      - {by: css, value: "div:nth-child(3) > app-detail:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > a:nth-child(6) > div:nth-child(2) > a:nth-child(2)", stability: low, score: 45}
+- contentinfo
+  - generic:
+    locators:
+      - {by: css, value: "[data-test=\"footer-explore\"]", stability: high, score: 98}
+    - link "Learn Test Automation Hands-on courses for Playwright, Robot Framework, APIs and more":
+      locators:
+        - {by: css, value: "[data-test=\"footer-learn-courses\"]", stability: high, score: 98}
+    - link "API Spector Open-source API testing, mocking and contract testing":
+      locators:
+        - {by: css, value: "[data-test=\"footer-learn-spector\"]", stability: high, score: 98}
+    - link "GitHub Source code, issues and contributions":
+      locators:
+        - {by: css, value: "[data-test=\"footer-learn-github\"]", stability: high, score: 98}
+  - link "Privacy Policy":
+    locators:
+      - {by: linkText, value: "Privacy Policy", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"/privacy\"]", stability: medium, score: 65}
+  - link "Barn Images":
+    locators:
+      - {by: linkText, value: "Barn Images", stability: medium, score: 75}
+      - {by: css, value: "a[href*=\"https://unsplash.com/@barnimages\"]", stability: medium, score: 65}
+  - link "Unsplash" [dup 2/2]:
+    locators:
+      - {by: css, value: "a[href*=\"https://unsplash.com/photos/t5YUoHW6zRo\"]", stability: medium, score: 65}
+- button "Open chat":
+  locators:
+    - {by: css, value: "[data-test=\"chat-toggle\"]", stability: high, score: 98}
+- button "Show live shop activity":
+  locators:
+    - {by: css, value: "[data-test=\"live-activity-toggle\"]", stability: high, score: 98}
+- iframe "frame-0":
+
+# --- Tables (headers + first rows) ---
+# table "table-0":
+#   row 1: Handle Material | Fiberglass
+#   row 2: Head Weight | 450g
+#   row 3: Length | 330mm
+#   row 4: Material | Carbon Steel
+#   row 5: Warranty | 5years
+#   … 1 more rows (truncated)
+
+# --- Selenium hints (best-effort; prefer high-stability locators) ---
+# generic: driver.findElement(By.cssSelector("[data-test=\"notification-bar\"]"))
+# Documentation: driver.findElement(By.linkText("Documentation"))
+# Testing Guide: driver.findElement(By.xpath("//button[normalize-space()=\"Testing Guide\"] | //input[@type=\"button\" and @value=\"Testing Guide\"]"))
+# 🐛 Bug Hunting: driver.findElement(By.xpath("//button[normalize-space()=\"🐛 Bug Hunting\"] | //input[@type=\"button\" and @value=\"🐛 Bug Hunting\"]"))
+# Practice Software Testing - Toolshop: driver.findElement(By.cssSelector("html:nth-child(1) > body:nth-child(2) > app-root:nth-child(1) > app-header:nth-child(2) > nav:nth-child(2) > div:nth-child(1) > a:nth-child(1)"))
+# Toggle navigation: driver.findElement(By.cssSelector("[aria-label=\"Toggle navigation\"]"))
+# iMattSmart: driver.findElement(By.linkText("iMattSmart"))
+# Unsplash (1/2): driver.findElement(By.cssSelector("a[href*=\"https://unsplash.com/photos/jaLaLQdkBOE\"]"))
+# unit-price: driver.findElement(By.cssSelector("[data-test=\"unit-price\"]"))
+# A = most environmentally friendly, E = higher environmental impact: driver.findElement(By.cssSelector("[data-test=\"co2-rating-badge\"]"))
+# generic: driver.findElement(By.cssSelector("[data-test=\"product-description\"]"))
+# Decrease quantity: driver.findElement(By.cssSelector("[data-test=\"decrease-quantity\"]"))
+# Quantity: driver.findElement(By.cssSelector("[data-test=\"quantity\"]"))
+# Increase quantity: driver.findElement(By.cssSelector("[data-test=\"increase-quantity\"]"))
+# Add to cart: driver.findElement(By.cssSelector("[data-test=\"add-to-cart\"]"))
+# Add to favourites: driver.findElement(By.cssSelector("[data-test=\"add-to-favorites\"]"))
+# Compare: driver.findElement(By.cssSelector("[data-test=\"add-to-compare\"]"))
+# generic: driver.findElement(By.cssSelector("app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)"))
+# generic: driver.findElement(By.cssSelector("app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > span:nth-child(1)"))
+# generic: driver.findElement(By.cssSelector("app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > span:nth-child(2)"))
+# generic: driver.findElement(By.cssSelector("app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > span:nth-child(1)"))
+# generic: driver.findElement(By.cssSelector("app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > span:nth-child(2)"))
+# generic: driver.findElement(By.cssSelector("app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) > span:nth-child(1)"))
+# generic: driver.findElement(By.cssSelector("app-detail:nth-child(2) > div:nth-child(2) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(5) > td:nth-child(2) > span:nth-child(1)"))
+# … 24 more hints truncated
