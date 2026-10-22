@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * Interactive page snapshot capture for feeding LLMs (Claude Code, etc.)
  * when generating Selenium Java automated tests.
  *
- * Manual capture only - press Ctrl+K on each UI state you care about.
+ * Manual capture only - press Ctrl+M on each UI state you care about.
  *
  * Usage:
  *   mvn -q exec:java -Dexec.args="https://example.com"
@@ -68,7 +68,7 @@ public class SnapshotCapture {
     /**
      * Toolbar, toast, hardened note/end UI, hotkeys. Loaded from classpath resource.
      * Primary trigger: on-page toolbar (same idea as pagesnap-playwright-legacy).
-     * Hotkeys: Ctrl+K capture, Ctrl+Shift+K note, Ctrl+Q end (optional folder name).
+     * Hotkeys: Ctrl+M capture, Ctrl+Shift+M note, Ctrl+Q end (optional folder name).
      */
     private static final String INSTALL_UI_JS = loadResource("/snapshot-chrome.js");
 
@@ -1204,8 +1204,8 @@ public class SnapshotCapture {
         System.out.println("Controls (PRIMARY = on-page toolbar):");
         System.out.println("  Toolbar dock: " + toolbarPosition + " (click L/M/R on panel to cycle)");
         System.out.println("  Toolbar buttons: Capture | Note | End (optional folder name on End)");
-        System.out.println("  Ctrl+K / Cmd+K             - capture snapshot");
-        System.out.println("  Ctrl+Shift+K / Cmd+Shift+K - capture with note");
+        System.out.println("  Ctrl+M / Cmd+M             - capture snapshot");
+        System.out.println("  Ctrl+Shift+M / Cmd+Shift+M - capture with note");
         System.out.println("  Ctrl+Q / Cmd+Q             - end session (optional folder name)");
         System.out.println("  Multi-tab: new tabs are detected; capture uses the tab that signaled");
         System.out.println("  Toast (Saved snapshot #N) appears top-right");
@@ -2117,7 +2117,7 @@ public class SnapshotCapture {
         List<String> removedOther = removed.stream().filter(l -> !looksLikeOptionLine(l)).sorted().toList();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("_Tip: For custom dropdowns, capture once closed and once open (Ctrl+Shift+K with notes)._\n\n");
+        sb.append("_Tip: For custom dropdowns, capture once closed and once open (Ctrl+Shift+M with notes)._\n\n");
         if (!addedOptions.isEmpty() || !removedOptions.isEmpty()) {
             sb.append("## Dropdown / options changes\n\n");
             for (String l : addedOptions.stream().limit(60).toList()) {
@@ -2383,8 +2383,8 @@ public class SnapshotCapture {
         System.out.println("Usage: mvn -q exec:java -Dexec.args=\"<url> [options]\"");
         System.out.println();
         System.out.println("Manual page snapshot capture for LLM-assisted Selenium Java test generation.");
-        System.out.println("  Ctrl+K       - capture snapshot (no note)");
-        System.out.println("  Ctrl+Shift+K - capture with note (in-page form)");
+        System.out.println("  Ctrl+M       - capture snapshot (no note)");
+        System.out.println("  Ctrl+Shift+M - capture with note (in-page form)");
         System.out.println("  Ctrl+Q       - end session");
         System.out.println();
         System.out.println("Options:");
