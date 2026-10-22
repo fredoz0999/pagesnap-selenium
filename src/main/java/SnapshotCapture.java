@@ -374,6 +374,104 @@ public class SnapshotCapture {
               return parts.length ? parts.join(' > ') : null;
             };
 
+            // Hand-written-style relative XPath, the way SDETs write it: anchored on visible text, a label, a
+            // preceding sibling, a repeated row/card's key text, or a stable ancestor - using following-sibling,
+            // parent, ancestor and contains(). Only a candidate that resolves to exactly this element is kept.
+            const xq = (s) => (String(s).indexOf("'") < 0 ? "'" + s + "'" : (String(s).indexOf('"') < 0 ? '"' + s + '"' : null));
+            const flatText = (n) => (n.innerText || n.textContent || '').replace(/\\s+/g, ' ').trim();
+            const ownText = (n) => {
+              let t = '';
+              for (const c of n.childNodes) if (c.nodeType === 3) t += c.textContent;
+              return t.replace(/\\s+/g, ' ').trim();
+            };
+            // Prices, counts and record numbers are data, not anchors.
+            const okText = (t) => !!t && t.length <= 60 && xq(t) != null && !isDynamicValue(t) && !/^[\\d\\s.,$€£%:\\/+-]+$/.test(t);
+            const textPred = (t) => t.length <= 40
+              ? 'normalize-space()=' + xq(t)
+              : 'contains(normalize-space(),' + xq(t.slice(0, 30).replace(/\\s+\\S*$/, '')) + ')';
+            const STRONG_ATTRS = ['data-testid', 'data-test', 'data-test-id', 'data-cy', 'data-qa', 'id', 'name', 'aria-label', 'title', 'placeholder'];
+            const strongPred = (n, allowPrefix) => {
+              for (const a of STRONG_ATTRS) {
+                const v = n.getAttribute && n.getAttribute(a);
+                if (v && xq(v) != null && !isDynamicValue(v)) return '@' + a + '=' + xq(v);
+              }
+              if (allowPrefix === false) return null;
+              for (const a of STRONG_ATTRS) {
+                const v = n.getAttribute && n.getAttribute(a);
+                const m = v ? String(v).match(/^([A-Za-z][A-Za-z_-]*[-_])/) : null;
+                if (m && m[1].length >= 4 && !isDynamicValue(m[1]) && xq(m[1]) != null) return 'starts-with(@' + a + ',' + xq(m[1]) + ')';
+              }
+              return null;
+            };
+            const elStep = (el) => {
+              const tag = el.tagName.toLowerCase();
+              const sp = strongPred(el, false);
+              if (sp) return tag + '[' + sp + ']';
+              const t = /^(BUTTON|A|LABEL|OPTION|SUMMARY|H[1-6]|TH|TD|LI|SPAN)$/.test(el.tagName) ? flatText(el) : ownText(el);
+              if (okText(t)) return tag + '[' + textPred(t) + ']';
+              const type = el.getAttribute('type');
+              if (el.tagName === 'INPUT' && type && !isDynamicValue(type)) return tag + '[@type=' + xq(type) + ']';
+              return tag;
+            };
+            const stableClass = (n) => Array.from(n.classList || []).find(c => c.length >= 3 && !isDynamicValue(c) && !/^(active|show|open|selected|disabled|d-|col|row$|m[trblxy]?-|p[trblxy]?-|w-|h-|text-|bg-|ng-|is-)/.test(c));
+            const anchoredXpath = (el) => {
+              const tag = el.tagName.toLowerCase();
+              const me = elStep(el);
+              const cands = [];
+              if (me !== tag && !me.startsWith('input[@type=')) cands.push('//' + me);
+              // label -> control
+              const lab = el.labels && el.labels[0];
+              const lt = lab ? flatText(lab) : '';
+              if (lab && okText(lt)) {
+                if (lab.contains(el)) cands.push('//label[' + textPred(lt) + ']//' + tag);
+                else if (lab.nextElementSibling === el) cands.push('//label[' + textPred(lt) + ']/following-sibling::' + tag + '[1]');
+                else cands.push('//label[' + textPred(lt) + ']/following::' + tag + '[1]');
+              }
+              // preceding sibling caption: <span>Quantity</span><input>
+              const prev = el.previousElementSibling;
+              if (prev && !prev.querySelector('input,select,textarea,button')) {
+                const pt = flatText(prev);
+                if (okText(pt)) cands.push('//' + prev.tagName.toLowerCase() + '[' + textPred(pt) + ']/following-sibling::' + me + '[1]');
+              }
+              // repeated row / card: anchor on its key text, then walk to the control
+              let c = el.parentElement;
+              for (let depth = 0; c && depth < 7; depth++, c = c.parentElement) {
+                const par = c.parentElement;
+                if (!par || Array.from(par.children).filter(x => x.tagName === c.tagName).length < 2) continue;
+                const keys = Array.from(c.querySelectorAll('h1,h2,h3,h4,h5,h6,a,td,th,strong,b,label,span,p,[data-test]'))
+                  .filter(k => k !== el && !k.contains(el) && !el.contains(k) && okText(flatText(k)) && !k.querySelector('input,select,button'));
+                const k = keys[0];
+                if (!k) continue;
+                const kt = flatText(k), kTag = k.tagName.toLowerCase(), cTag = c.tagName.toLowerCase();
+                if (c.tagName === 'TR' && k.tagName === 'TD') {
+                  const cell = el.closest('td');
+                  if (cell && cell !== k && (k.compareDocumentPosition(cell) & 4)) cands.push('//td[' + textPred(kt) + ']/following-sibling::td//' + me);
+                  cands.push('//tr[td[' + textPred(kt) + ']]//' + me);
+                } else {
+                  if (k.parentElement === c) cands.push('//' + kTag + '[' + textPred(kt) + ']/parent::' + cTag + '//' + me);
+                  const cls = stableClass(c);
+                  if (cls) cands.push('//' + kTag + '[' + textPred(kt) + ']/ancestor::' + cTag + '[contains(@class,' + xq(cls) + ')][1]//' + me);
+                  cands.push('//' + cTag + '[.//' + kTag + '[' + textPred(kt) + ']]//' + me);
+                }
+                break;
+              }
+              // own stable prefix of a generated id (weakest: a new sibling with the same prefix breaks it)
+              const pp = strongPred(el, true);
+              const prefixOnly = pp && pp.indexOf('starts-with(') === 0 ? '//' + tag + '[' + pp + ']' : null;
+              // stable ancestor: //div[@id='filters']//input[...]
+              for (let a = el.parentElement, d = 0; a && d < 8 && a.tagName !== 'BODY'; a = a.parentElement, d++) {
+                const ap = strongPred(a);
+                if (ap) { cands.push('//' + a.tagName.toLowerCase() + '[' + ap + ']//' + me); break; }
+              }
+              if (prefixOnly) cands.push(prefixOnly);
+              for (const v of cands) {
+                if (!v || v.indexOf('null') >= 0) continue;
+                const loc = stampScore({ by: 'xpath', value: v, stability: 'medium' });
+                if (!loc.dynamic && isUniqueLocator(el, loc)) return loc;
+              }
+              return null;
+            };
+
             // Narrow a locator that matched several elements (radio groups above all).
             const repairLocator = (el, cand) => {
               const nameAttr = el.getAttribute('name');
@@ -448,6 +546,7 @@ public class SnapshotCapture {
               if (loc.by === 'linkText') return false; // visible text is user-facing, not generated
               const parts = [];
               String(loc.value).replace(/"([^"]*)"/g, (m, g) => { parts.push(g); return m; });
+              String(loc.value).replace(/'([^']*)'/g, (m, g) => { parts.push(g); return m; });
               String(loc.value).replace(/[#.]([A-Za-z_][-\\w]*)/g, (m, g) => { parts.push(g); return m; });
               return parts.some(isDynamicValue);
             };
@@ -460,6 +559,8 @@ public class SnapshotCapture {
 
             const buildLocators = (el) => {
               const locators = [];
+              const actsOn = /^(INPUT|SELECT|TEXTAREA|BUTTON|A|OPTION|SUMMARY)$/.test(el.tagName)
+                || /^(button|link|checkbox|radio|switch|tab|menuitem|option|combobox|textbox|slider|spinbutton|treeitem)$/.test(el.getAttribute('role') || '');
               let hasId = false;
               let hasName = false;
               let hasTestId = false;
@@ -571,12 +672,6 @@ public class SnapshotCapture {
                 if (ph && ph.trim() && !isDynamicValue(ph)) {
                   push('css', el.tagName.toLowerCase() + '[placeholder="' + ph.trim().replace(/"/g, '\\\\"') + '"]', 'medium');
                 }
-                const lbl = el.labels && el.labels.length ? (el.labels[0].innerText || '').replace(/\\s+/g, ' ').trim() : '';
-                if (lbl && lbl.length < 60 && lbl.indexOf('"') < 0) {
-                  const tag = el.tagName.toLowerCase();
-                  const wrapped = el.labels[0].contains(el);
-                  push('xpath', '//label[normalize-space()="' + lbl + '"]' + (wrapped ? '//' + tag : '/following::' + tag + '[1]'), 'medium');
-                }
               }
               for (const pc of prefixCands) push('css', pc, 'low'); // unique today, but any new sibling with the prefix breaks it
 
@@ -612,7 +707,13 @@ public class SnapshotCapture {
                 }
               }
 
-              if (!verified.length) {
+              if (!verified.some(v => (v.score || 0) >= 60)) {
+                const ax = anchoredXpath(el);
+                if (ax && !verified.some(v => v.value === ax.value)) verified.push(ax);
+              }
+
+              // Positional css is the last resort, and only for a control a test acts on - never for containers.
+              if (!verified.length && actsOn) {
                 const path = structuralPath(el);
                 if (path) {
                   const structural = stampScore({ by: 'css', value: path, stability: 'low' });
@@ -631,6 +732,11 @@ public class SnapshotCapture {
                 return true;
               });
 
+              // Positional css (nth-child chains) is only a last resort: drop it once a stable locator scores 60+,
+              // and always on containers (a test never clicks a layout span by its position).
+              if (!actsOn || cleaned.some(l => !l.dynamic && (l.score || 0) >= 60)) {
+                for (let i = cleaned.length - 1; i >= 0; i--) if (cleaned[i].by === 'css' && /nth-child/.test(cleaned[i].value)) cleaned.splice(i, 1);
+              }
               // A locator built on a generated value is dropped whenever any stable one exists.
               if (cleaned.some(l => !l.dynamic)) {
                 for (let i = cleaned.length - 1; i >= 0; i--) if (cleaned[i].dynamic) cleaned.splice(i, 1);
@@ -1524,6 +1630,7 @@ public class SnapshotCapture {
         prompt.append("- Prefer the highest `score` locator. Never use `score <= 40` unless nothing else exists; a `matches: N` locator is not unique.\n");
         prompt.append("- Prefer locators marked `stability: high` (id, name, data-testid) from the YAML. Never use `stability: low` unless nothing else exists.\n");
         prompt.append("- Never use a locator containing a generated value (ULID/UUID, counters like mat-input-4 or input-8472, hashed classes like css-1x2y3z): it changes next run. Such locators are scored 20 and are only listed when nothing stable exists; then ask the developer for a stable data-test.\n");
+        prompt.append("- If a control has no stable attribute, use its recorded anchored XPath (text, label, row/card anchor with following-sibling/parent/ancestor). Never write absolute (/html/...) or index-only XPath, and never key on prices, counts or record numbers.\n");
         prompt.append("- Do not `driver.get(...)` a URL to skip a control that is in the YAML (especially the cart).\n");
         prompt.append("- Each control lists at most two verified locators (token-lean); do not invent extras.\n");
         prompt.append("- Use ").append(waits).append(" waits (avoid brittle Thread.sleep).\n");
@@ -1560,6 +1667,7 @@ public class SnapshotCapture {
         guide.append("## Locators\n");
         guide.append("- Prefer the highest `score`. Never use `score <= 40` unless nothing else exists. Never use `stability: low` unless nothing else exists.\n");
         guide.append("- Never use a locator containing a generated value (ULID/UUID, counters like mat-input-4 or input-8472, hashed classes like css-1x2y3z): it changes next run. Such locators are scored 20 and are only listed when nothing stable exists; then ask the developer for a stable data-test.\n");
+        guide.append("- If a control has no stable attribute, use its recorded anchored XPath (text, label, row/card anchor with following-sibling/parent/ancestor). Never write absolute (/html/...) or index-only XPath, and never key on prices, counts or record numbers.\n");
         guide.append("- YAML `by: css` with a `[data-test...]` value is the test-id locator: use By.cssSelector exactly as written.\n");
         guide.append("- Do not driver.get(...) a URL to skip a control that is in the YAML (especially the cart).\n\n");
         guide.append("## Actions\n");
