@@ -2,13 +2,21 @@
 
 You are given YAML page snapshots of a real web UI, captured for generating **Selenium Java** tests.
 
+## Files in a session folder
+
+- `SESSION.md` — start URL, goal, framework, style. Read first.
+- `TEST_GUIDE.md` — short rules for a runnable test. Read second.
+- `flow.md`, `NN_<host>.yaml`, `NN_diff.md`, `PROMPT.md`, this file.
+
 ## How to read snapshots
+
+- `generic` nodes have a test id but no ARIA role (cart badge, icon links). Reach them through their `by: css` `[data-test...]` locator; never treat `generic` as a role.
 
 - Header comments: URL, timestamp, step number, optional user note / session goal.
 - Tree lines: ARIA-inspired roles (`button`, `textbox`, `link`, …) and accessible names.
 - Nested under controls:
   - `value` — current field value (passwords redacted as `***`)
-  - `locators` — ordered candidates with `stability: high|medium|low`.
+  - `locators` — ordered candidates (best first) with `stability: high|medium|low` and a numeric `score`.
     Each was checked against the live page while capturing and resolves to
     exactly this element. One carrying `matches: N` is the exception: it finds N
     elements (a radio group, say), so narrow it before use — Selenium will
@@ -43,7 +51,7 @@ You are given YAML page snapshots of a real web UI, captured for generating **Se
 
 ## Locator rules
 
-1. Prefer `stability: high` (`id`, `name`, `data-testid` / `data-test` / `data-cy`).
+1. Prefer the highest `score` (data-test css 98, id 92, name 88, linkText 75, other css 45-85, xpath 40). Never use `score <= 40` unless nothing else exists; a `matches: N` locator is not unique (score capped at 40). Prefer `stability: high` (`id`, `name`, `data-testid` / `data-test` / `data-cy`).
 2. Then `css` with stable attributes.
 3. Use `xpath` / link text only as last resort.
 4. Never invent ids or names not present in the snapshot.

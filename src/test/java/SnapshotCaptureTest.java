@@ -214,4 +214,27 @@ class SnapshotCaptureTest {
         assertTrue(out.contains("## Added"), out);
         assertTrue(out.contains("+ - alert \"Email is required.\""), out);
     }
+
+    // --- note normalization / duplicate captures -------------------------------
+
+    @Test
+    void normalizeNoteCollapsesDoubledPrefixAndGluedPrefixes() {
+        assertEquals("action: click login", SnapshotCapture.normalizeNote("action: action: click login"));
+        assertEquals("step 2 assert: cart shows 1", SnapshotCapture.normalizeNote("step 2assert: cart shows 1"));
+        assertEquals("", SnapshotCapture.normalizeNote(null));
+    }
+
+    @Test
+    void normalizeNoteCollapsesAccidentalDoubleText() {
+        assertEquals("add to cart", SnapshotCapture.normalizeNote("add to cartadd to cart"));
+    }
+
+    @Test
+    void duplicateCaptureNeedsSameUrlSameNoteInsideWindow() {
+        assertTrue(SnapshotCapture.isDuplicateCapture(1000, "u", "n", 1000 + 2499, "u", "n"));
+        assertFalse(SnapshotCapture.isDuplicateCapture(1000, "u", "n", 1000 + 2500, "u", "n"));
+        assertFalse(SnapshotCapture.isDuplicateCapture(1000, "u", "n", 1100, "u2", "n"));
+        assertFalse(SnapshotCapture.isDuplicateCapture(1000, "u", "n", 1100, "u", "other"));
+        assertFalse(SnapshotCapture.isDuplicateCapture(0, null, null, 10, "u", "n"));
+    }
 }

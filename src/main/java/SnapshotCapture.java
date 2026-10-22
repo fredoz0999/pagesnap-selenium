@@ -102,8 +102,15 @@ public class SnapshotCapture {
               'heading', 'img', 'table', 'row', 'cell', 'columnheader', 'rowheader',
               'list', 'listitem', 'navigation', 'main', 'banner', 'contentinfo',
               'form', 'region', 'article', 'complementary', 'toolbar', 'progressbar',
-              'slider', 'spinbutton', 'tree', 'treeitem', 'grid', 'gridcell'
+              'slider', 'spinbutton', 'tree', 'treeitem', 'grid', 'gridcell',
+              'generic'
             ]);
+
+            // Visible data-test* nodes with no ARIA role (cart badge, href-less cart link)
+            // are kept as `generic` so a test can reach them by their test id.
+            const hasTestIdAttr = (el) => !!(el.getAttribute && (el.getAttribute('data-testid')
+              || el.getAttribute('data-test') || el.getAttribute('data-test-id')
+              || el.getAttribute('data-cy') || el.getAttribute('data-qa')));
 
             const esc = (s) => String(s == null ? '' : s)
               .replace(/\\\\/g, '\\\\\\\\')
@@ -182,7 +189,7 @@ public class SnapshotCapture {
             const implicitRole = (el) => {
               const tag = el.tagName.toLowerCase();
               const type = (el.getAttribute('type') || '').toLowerCase();
-              if (tag === 'a' && el.hasAttribute('href')) return 'link';
+              if (tag === 'a' && (el.hasAttribute('href') || hasTestIdAttr(el))) return 'link';
               if (tag === 'button') return 'button';
               if (tag === 'input') {
                 if (type === 'checkbox') return 'checkbox';
@@ -372,16 +379,16 @@ public class SnapshotCapture {
               const nameAttr = el.getAttribute('name');
               const valueAttr = el.getAttribute('value');
               if (nameAttr && valueAttr != null && valueAttr !== '') {
-                const narrowed = {
+                const narrowed = stampScore({
                   by: 'css',
                   value: el.tagName.toLowerCase() + attrSel('name', nameAttr) + attrSel('value', valueAttr),
                   stability: cand.stability
-                };
+                });
                 if (isUniqueLocator(el, narrowed)) return narrowed;
               }
               const path = structuralPath(el);
               if (path) {
-                const structural = { by: 'css', value: path, stability: 'low' };
+                const structural = stampScore({ by: 'css', value: path, stability: 'low' });
                 if (isUniqueLocator(el, structural)) return structural;
               }
               return null;
@@ -393,13 +400,28 @@ public class SnapshotCapture {
             const ACTIONABLE = new Set([
               'button', 'link', 'textbox', 'searchbox', 'combobox', 'listbox', 'option',
               'checkbox', 'radio', 'switch', 'tab', 'menuitem', 'slider', 'spinbutton',
-              'form'
+              'form', 'generic'
             ]);
 
             // Token-lean multi-locator: keep the classic by/value/stability shape,
             // but emit at most two verified strategies and skip redundant twins
             // (id vs #id, name vs tag[name=…]).
             const MAX_LOCATORS = 2;
+
+            // Numeric reliability score (higher is better), mapped to Selenium `by` values.
+            // data-test* css 98, id 92, name 88, linkText 75, other css 45-70, xpath 40.
+            // A non-unique locator (`matches`) is capped at 40 so the LLM never prefers it.
+            const TESTID_CSS = /^\\[data-(testid|test|test-id|cy|qa)=/;
+            const locatorScore = (loc) => {
+              if (loc.matches != null) return 40;
+              if (loc.by === 'css' && TESTID_CSS.test(loc.value)) return 98;
+              if (loc.by === 'id') return 92;
+              if (loc.by === 'name') return 88;
+              if (loc.by === 'linkText') return 75;
+              if (loc.by === 'css') return loc.stability === 'low' ? 45 : loc.stability === 'medium' ? 65 : 85;
+              return 40;
+            };
+            const stampScore = (loc) => { loc.score = locatorScore(loc); return loc; };
 
             const buildLocators = (el) => {
               const locators = [];
@@ -408,7 +430,7 @@ public class SnapshotCapture {
               let hasTestId = false;
               const push = (by, value, stability) => {
                 if (value == null || String(value).trim() === '') return;
-                locators.push({ by: by, value: String(value), stability: stability });
+                locators.push(stampScore({ by: by, value: String(value), stability: stability }));
               };
 
               const testId = el.getAttribute('data-testid') || el.getAttribute('data-test')
@@ -518,7 +540,7 @@ public class SnapshotCapture {
                   if (narrowed && !verified.some(v => v.by === narrowed.by && v.value === narrowed.value)) {
                     verified.push(narrowed);
                   } else if (ambiguous.length < 1) {
-                    ambiguous.push({ by: cand.by, value: cand.value, stability: cand.stability, matches: found.length });
+                    ambiguous.push(stampScore({ by: cand.by, value: cand.value, stability: cand.stability, matches: found.length }));
                   }
                 }
               }
@@ -526,7 +548,7 @@ public class SnapshotCapture {
               if (!verified.length) {
                 const path = structuralPath(el);
                 if (path) {
-                  const structural = { by: 'css', value: path, stability: 'low' };
+                  const structural = stampScore({ by: 'css', value: path, stability: 'low' });
                   if (isUniqueLocator(el, structural)) verified.push(structural);
                 }
               }
@@ -542,8 +564,8 @@ public class SnapshotCapture {
                 return true;
               });
 
-              const rank = (st) => (st === 'high' ? 0 : st === 'medium' ? 1 : 2);
-              cleaned.sort((a, b) => rank(a.stability) - rank(b.stability) || a.by.localeCompare(b.by));
+              // Rank by numeric score (best first); ties fall back to `by` for stable output.
+              cleaned.sort((a, b) => (b.score - a.score) || a.by.localeCompare(b.by));
 
               // Prefer diverse strategies (id + name, not id + id).
               const picked = [];
@@ -619,6 +641,7 @@ public class SnapshotCapture {
               if (!role && !inAlert && el.matches && el.matches(BANNER_SELECTOR) && isVisible(el)) {
                 if (collapsedText(el)) { role = 'alert'; }
               }
+              if (!role && hasTestIdAttr(el) && isVisible(el)) role = 'generic';
               const interesting = role && INTERESTING.has(role) && isVisible(el);
 
               if (interesting) {
@@ -726,6 +749,7 @@ public class SnapshotCapture {
                     for (const l of locators) {
                       lines.push(ind + '  - {by: ' + l.by + ', value: "' + esc(l.value)
                         + '", stability: ' + l.stability
+                        + ', score: ' + (l.score != null ? l.score : locatorScore(l))
                         + (l.matches != null ? ', matches: ' + l.matches : '') + '}');
                     }
                     // Selenium hint from a locator verified unique, never an ambiguous one
@@ -1424,7 +1448,10 @@ public class SnapshotCapture {
         prompt.append("Using the YAML page snapshots and `flow.md` in this folder, generate ");
         prompt.append("**Selenium Java** automated tests.\n\n");
         prompt.append("Requirements:\n");
-        prompt.append("- Prefer locators marked `stability: high` (id, name, data-testid) from the YAML.\n");
+        prompt.append("- Read `SESSION.md`, then `TEST_GUIDE.md`, then `flow.md`, then the YAML snapshots.\n");
+        prompt.append("- Prefer the highest `score` locator. Never use `score <= 40` unless nothing else exists; a `matches: N` locator is not unique.\n");
+        prompt.append("- Prefer locators marked `stability: high` (id, name, data-testid) from the YAML. Never use `stability: low` unless nothing else exists.\n");
+        prompt.append("- Do not `driver.get(...)` a URL to skip a control that is in the YAML (especially the cart).\n");
         prompt.append("- Each control lists at most two verified locators (token-lean); do not invent extras.\n");
         prompt.append("- Use ").append(waits).append(" waits (avoid brittle Thread.sleep).\n");
         prompt.append("- Structure: ").append(style).append(".\n");
@@ -1438,6 +1465,35 @@ public class SnapshotCapture {
             prompt.append("\nUser goal: ").append(goal).append('\n');
         }
         Files.writeString(sessionDir.resolve("PROMPT.md"), prompt.toString(), StandardCharsets.UTF_8);
+
+        StringBuilder sessionMd = new StringBuilder();
+        sessionMd.append("# PageSnap session\n\n");
+        sessionMd.append("- Start URL: ").append(sessionStartUrl).append('\n');
+        if (goal != null && !goal.isBlank()) {
+            sessionMd.append("- Goal: ").append(goal).append('\n');
+        }
+        sessionMd.append("- Framework: ").append(framework).append('\n');
+        sessionMd.append("- Style: ").append(style).append('\n');
+        sessionMd.append("- Generated: ").append(ISO_TS.format(sessionStart)).append("\n\n");
+        sessionMd.append("Steps: see flow.md (updated as you capture)\n\n");
+        sessionMd.append("Read order: SESSION.md -> TEST_GUIDE.md -> flow.md -> YAML snapshots -> PROMPT.md / Reading-Snapshots.md\n");
+        Files.writeString(sessionDir.resolve("SESSION.md"), sessionMd.toString(), StandardCharsets.UTF_8);
+
+        StringBuilder guide = new StringBuilder();
+        guide.append("# Test generation guide\n\n");
+        guide.append("Read in this order: SESSION.md -> TEST_GUIDE.md -> flow.md -> YAML snapshots -> PROMPT.md / Reading-Snapshots.md\n\n");
+        guide.append("## Goal\n");
+        guide.append("Produce ONE runnable Selenium Java test covering EVERY flow.md step in order. Do not invent steps or elements.\n\n");
+        guide.append("## Locators\n");
+        guide.append("- Prefer the highest `score`. Never use `score <= 40` unless nothing else exists. Never use `stability: low` unless nothing else exists.\n");
+        guide.append("- YAML `by: css` with a `[data-test...]` value is the test-id locator: use By.cssSelector exactly as written.\n");
+        guide.append("- Do not driver.get(...) a URL to skip a control that is in the YAML (especially the cart).\n\n");
+        guide.append("## Actions\n");
+        guide.append("- Native `<select>`: `new Select(...)` from `options:`. Custom dropdown: closed then open; read NN_diff.md.\n");
+        guide.append("- Honor waits=").append(waits).append(". Never Thread.sleep.\n");
+        guide.append("- Honor `action:` / `assert:` / `data:` prefixes in notes.\n\n");
+        guide.append("Framework=").append(framework).append(". Style=").append(style).append(". Waits=").append(waits).append(".\n");
+        Files.writeString(sessionDir.resolve("TEST_GUIDE.md"), guide.toString(), StandardCharsets.UTF_8);
         refreshFlowFromSteps();
     }
 
@@ -1465,7 +1521,7 @@ public class SnapshotCapture {
 
                 ## Locator rules
 
-                1. Prefer stability high (id, name, data-testid).
+                1. Prefer the highest `score` (data-test css 98, id 92, name 88, linkText 75, css 45-85, xpath 40); never use score <= 40 unless nothing else exists. Prefer stability high (id, name, data-testid).
                 2. Never invent elements not in the snapshot.
                 3. Explicit waits; Page Object when style=pageobject.
                 """;
@@ -1598,8 +1654,42 @@ public class SnapshotCapture {
     }
 
     @SuppressWarnings("unchecked")
+    /** Same URL + same note within this window is a double-fire, not a second step. */
+    static final long DUP_WINDOW_MS = 2500;
+    private long lastCaptureAtMs;
+    private String lastCaptureUrl;
+    private String lastCaptureNote;
+
+    /**
+     * Collapse doubled prefixes and glued duplicates from the note dialog:
+     * "2action:" -> "2 action:", "action: action: x" -> "action: x", "abcabc" -> "abc".
+     */
+    static String normalizeNote(String raw) {
+        String n = raw == null ? "" : raw.replaceAll("\\s+", " ").trim();
+        n = n.replaceAll("(?i)(\\S)(?=(?:action|assert|data):)", "$1 ");
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("(?i)^(action|assert|data):\\s*(?:\\1:\\s*)+").matcher(n);
+        if (m.find()) {
+            n = n.substring(0, m.start()) + m.group(1).toLowerCase() + ": " + n.substring(m.end());
+        }
+        if (n.length() >= 8 && n.length() % 2 == 0) {
+            int half = n.length() / 2;
+            if (n.substring(0, half).equals(n.substring(half))) {
+                n = n.substring(0, half).trim();
+            }
+        }
+        return n.replaceAll("\\s+", " ").trim();
+    }
+
+    static boolean isDuplicateCapture(long lastAt, String lastUrl, String lastNote,
+                                      long now, String url, String note) {
+        return lastUrl != null && now - lastAt < DUP_WINDOW_MS
+                && lastUrl.equals(url) && java.util.Objects.equals(lastNote, note);
+    }
+
     private boolean saveSnapshot(WebDriver driver, JavascriptExecutor js, String note) {
         try {
+            note = normalizeNote(note);
             String url = driver.getCurrentUrl();
             if (url == null || url.equals("about:blank")) {
                 System.out.println("  Skipped: about:blank");
@@ -1611,6 +1701,15 @@ public class SnapshotCapture {
                 }
                 return false;
             }
+
+            long nowMs = System.currentTimeMillis();
+            if (isDuplicateCapture(lastCaptureAtMs, lastCaptureUrl, lastCaptureNote, nowMs, url, note)) {
+                System.out.println("  Skipped duplicate capture");
+                return false;
+            }
+            lastCaptureAtMs = nowMs;
+            lastCaptureUrl = url;
+            lastCaptureNote = note;
 
             waitForDomReady(js, 300, 5000);
 
