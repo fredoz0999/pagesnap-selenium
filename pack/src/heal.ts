@@ -6,6 +6,7 @@
  * `--write` replaces the call only when the best candidate is clearly ahead (confidence >= 0.75 and a 0.15
  * margin over the runner-up) and the finding is a missing locator (never for ambiguous ones).
  */
+import { locatorHasDynamic } from "./dynamic.js";
 import fs from "node:fs";
 import path from "node:path";
 import { parseSnapshot, walk } from "./parse.js";
@@ -93,7 +94,7 @@ function poolFor(sessionDir: string): Pool[] {
     walk(snap.roots, (n) => {
       nodeNo++;
       for (const l of n.locators) {
-        if (l.matches != null) continue;
+        if (l.matches != null || locatorHasDynamic(l.by, l.value)) continue; // never suggest a generated value as the fix
         out.push({ ctl: "n" + nodeNo, step: snap.step, role: n.role, name: n.name, by: l.by, value: l.value, uScore: l.score ?? 60 });
       }
     });

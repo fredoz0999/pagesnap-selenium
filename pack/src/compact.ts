@@ -9,6 +9,7 @@
  *  - nameless generic wrappers flattened, `- ` bullets and 2-space indents dropped
  *  - the duplicate "All <select> options" and hint footer blocks removed
  */
+import { locatorHasDynamic } from "./dynamic.js";
 import { idSelector, type Locator, type SnapNode, type Snapshot } from "./parse.js";
 
 export interface CNode {
@@ -46,7 +47,7 @@ function q(s: string): string {
 
 /** Render one locator; empty string when it is implied by role + name. */
 export function fmtLocator(l: Locator, node: { role: string; name: string }): string {
-  const dup = l.matches != null ? " (x" + l.matches + " not unique)" : "";
+  const dup = (l.matches != null ? " (x" + l.matches + " not unique)" : "") + (locatorHasDynamic(l.by, l.value) ? " (DYNAMIC: changes per run, do not use)" : "");
   switch (l.by) {
     case "testid": return "testid=" + l.value + dup;
     case "id": return idSelector(l.value) + dup;
@@ -93,8 +94,11 @@ const ACTIONABLE = new Set([
 
 /** Structural nth-child css on a non-actionable node is noise for test generation. */
 function usefulLocators(n: SnapNode): Locator[] {
-  if (ACTIONABLE.has(n.role)) return n.locators;
-  return n.locators.filter((l) => !(l.by === "css" && l.stability === "low"));
+  // Generated values never lead: drop them when anything stable exists (older captures ranked them first).
+  const stable = n.locators.filter((l) => !locatorHasDynamic(l.by, l.value));
+  const pool = stable.length ? stable : n.locators;
+  if (ACTIONABLE.has(n.role)) return pool;
+  return pool.filter((l) => !(l.by === "css" && l.stability === "low"));
 }
 
 const TABLE_PARTS = new Set(["row", "cell", "gridcell", "columnheader", "rowheader", "rowgroup"]);

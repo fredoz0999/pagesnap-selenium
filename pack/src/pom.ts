@@ -14,6 +14,7 @@
  * Each member is a `public static final By FOO_BUTTON` plus a `fooButton()` method
  * returning the WebElement, so tests can use either WebDriverWait(By) or the element.
  */
+import { locatorHasDynamic } from "./dynamic.js";
 import fs from "node:fs";
 import path from "node:path";
 import { parseSnapshot, walk, type Locator, type SnapNode } from "./parse.js";
@@ -27,6 +28,7 @@ export interface PomMember {
   locator: Locator;
   by: string;
   fragile: boolean;
+  dynamic?: boolean;
 }
 
 export interface PomPage {
@@ -133,7 +135,9 @@ function classNameFor(urlPath: string): string {
 }
 
 function bestLocator(n: SnapNode): Locator | null {
-  const ok = n.locators.filter((l) => l.matches == null);
+  const unique = n.locators.filter((l) => l.matches == null);
+  const stable = unique.filter((l) => !locatorHasDynamic(l.by, l.value));
+  const ok = stable.length ? stable : unique; // a generated value is used only when nothing stable exists
   if (!ok.length) return null;
   return ok.reduce((a, b) => ((b.score ?? 0) > (a.score ?? 0) ? b : a));
 }
@@ -214,7 +218,8 @@ export function buildPom(sessionDir: string): Omit<PomResult, "files"> {
         name: r.node.name,
         locator: r.loc,
         by: byCode(r.loc),
-        fragile: r.loc.by === "xpath" || (r.loc.by === "css" && /nth-child/.test(r.loc.value)) || (r.loc.score ?? 100) <= 45,
+        fragile: (r.loc.by === "xpath" && (r.loc.score ?? 0) < 60) || (r.loc.by === "css" && /nth-child/.test(r.loc.value)) || (r.loc.score ?? 100) <= 45 || locatorHasDynamic(r.loc.by, r.loc.value),
+        dynamic: locatorHasDynamic(r.loc.by, r.loc.value),
       });
     }
     return out;
@@ -249,7 +254,7 @@ function memberLines(ms: PomMember[]): string[] {
   const out: string[] = [];
   for (const m of ms) {
     const label = m.name ? m.role + ' "' + m.name.replace(/\*\//g, "") + '"' : m.role;
-    out.push("    /** " + label + (m.fragile ? " - FRAGILE locator, ask dev for a test id" : "") + " */");
+    out.push("    /** " + label + (m.dynamic ? " - DYNAMIC locator (generated value, will break next run): ask dev for a stable test id" : m.fragile ? " - FRAGILE locator, ask dev for a test id" : "") + " */");
     out.push("    public static final By " + m.constant + " = " + m.by + ";");
     out.push("");
     out.push("    public WebElement " + m.prop + "() {");

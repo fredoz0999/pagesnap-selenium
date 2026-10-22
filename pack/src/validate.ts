@@ -7,12 +7,13 @@
  * `By.xpath` and `By.className` string-literal calls. Non-literal arguments (variables,
  * concatenation) are reported as unverified.
  */
+import { locatorHasDynamic } from "./dynamic.js";
 import fs from "node:fs";
 import path from "node:path";
 import { parseSnapshot, walk, type Snapshot } from "./parse.js";
 import { snapshotFiles } from "./index.js";
 
-export type Status = "ok" | "missing" | "ambiguous" | "unverified";
+export type Status = "ok" | "missing" | "ambiguous" | "unverified" | "dynamic";
 
 export interface Finding {
   file: string;
@@ -86,6 +87,9 @@ function check(file: string, call: Call, invs: Inventory[]): Finding {
   const f = (status: Status, detail: string): Finding => ({ file, line: call.line, call: call.call, status, detail });
   if (call.arg == null) return f("unverified", "argument is not a plain string literal - checked at runtime only");
   const arg = call.arg;
+  if (call.kind !== "linkText" && call.kind !== "partialLinkText" && locatorHasDynamic(call.kind === "className" ? "css" : call.kind, arg)) {
+    return f("dynamic", "'" + arg + "' contains a generated value (id/counter/hash) that changes between runs - use a stable attribute: data-test, name, label text, placeholder");
+  }
   const steps = (pred: (inv: Inventory) => number) => {
     const counts = invs.map((inv) => ({ step: inv.step, n: pred(inv) })).filter((x) => x.n > 0);
     if (!counts.length) return null;
@@ -154,14 +158,14 @@ export function validateJava(sessionDir: string, target: string): ValidateReport
     const rel = path.relative(path.dirname(target), file) || path.basename(file);
     return extractCalls(fs.readFileSync(file, "utf8")).map((c) => check(rel, c, invs));
   });
-  const counts: Record<Status, number> = { ok: 0, missing: 0, ambiguous: 0, unverified: 0 };
+  const counts: Record<Status, number> = { ok: 0, missing: 0, ambiguous: 0, unverified: 0, dynamic: 0 };
   findings.forEach((x) => counts[x.status]++);
-  const icon: Record<Status, string> = { ok: "OK  ", missing: "MISS", ambiguous: "AMBG", unverified: "????" };
+  const icon: Record<Status, string> = { ok: "OK  ", missing: "MISS", ambiguous: "AMBG", unverified: "????", dynamic: "DYN " };
   const lines = [
     "pagesnap validate: " + files.length + " java file(s) vs " + invs.length + " snapshot(s)",
     ...findings.map((x) => icon[x.status] + " " + x.file + ":" + x.line + "  " + x.call + "  - " + x.detail),
     "",
-    "ok " + counts.ok + " | missing " + counts.missing + " | ambiguous " + counts.ambiguous + " | unverified " + counts.unverified,
+    "ok " + counts.ok + " | missing " + counts.missing + " | ambiguous " + counts.ambiguous + " | unverified " + counts.unverified + " | dynamic " + counts.dynamic,
   ];
   return { findings, counts, text: lines.join("\n") + "\n" };
 }

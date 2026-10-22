@@ -61,10 +61,13 @@ describe("java page objects and validation", () => {
       'driver.findElement(By.cssSelector("[data-test=\\"checkout\\"]"));',
       'driver.findElement(By.id("nope-field"));',
       'driver.findElement(By.id(dyn));',
+      'driver.findElement(By.id("mat-input-4"));',
+      'driver.findElement(By.cssSelector("[data-test=\\"category-01M5GND72GRNKJ0VS990Z1N3CF\\"]"));',
       '// By.id("commented-out")',
     ].join("\n"));
     const rep = validateJava(FIXTURE, f);
-    expect(rep.counts).toEqual({ ok: 2, missing: 1, ambiguous: 0, unverified: 1 });
+    expect(rep.counts).toEqual({ ok: 2, missing: 1, ambiguous: 0, unverified: 1, dynamic: 2 });
+    expect(rep.findings.filter((x) => x.status === "dynamic").map((x) => x.detail).join(" ")).toContain("changes between runs");
   });
 });
 

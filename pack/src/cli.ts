@@ -121,7 +121,7 @@ async function main(argv: string[]): Promise<number> {
       if (!target) { console.error("validate needs a .java file or folder"); return 1; }
       const rep = validateJava(dir, userPath(target));
       process.stdout.write(rep.text);
-      return rep.counts.missing > 0 ? 1 : 0;
+      return rep.counts.missing > 0 || rep.counts.dynamic > 0 ? 1 : 0;
     }
     case "prompt": {
       const name = flag(rest, "name");
